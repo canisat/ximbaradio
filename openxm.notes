@@ -1,0 +1,40 @@
+OpenXM Server:
+-------------------------
+1. Read 33 bytes before XM Radio registration is active, 40 after.
+2. Returns last retrieved channel information for channels that have no
+   data in them.  Should return blank data or a return code of some kind.
+3. After extended use, starts to return only current channel info for
+   xmCHA:NF0: if "XXX" is specified as a channel number.
+4. Not all commands return 1/0.  They should be consistant.
+5. There is no command implemented (though its spec'd in the comments) for
+   "get all".
+6. Strings returned are truncated.  To fix this, change the protocol for
+   queries to be:
+   a. <length of data> \n
+   b. <data> \n
+   So its two lines, one with the length of the data to be returned and the
+   second with the real data.
+   Note:  XMPCR.pm needs to return full strings too - it probably doesn't
+   yet.
+
+
+Ximba Radio:
+---------------
+1. Fix online icon to change when we're online vs offline.
+2. Enable sorting for channel listing columns.
+3. Add JumpToStationName code.
+
+Features to be added:
+1. Tabs for "by category" listings - add new tabs as new categories are
+   encountered.  "Favorites" tab has two subnotebooks, one for stations
+	and one for artists.
+2. Favorites - Mark a current artist or channel as a favorite.
+3. New Column: Usage - keeps track of percent usage vs other stations.  How
+   to calculate?  By time spent on a channel or by number of times that
+   station is selected?
+4. Notify when a favorite artist is playing on some station other
+   than the current one, allow quick jump to that station.
+5. Start/Stop Daemon.
+
+Long term:
+1. SLIK based skin interface (or something like mplayer - maybe as a plugin?).
