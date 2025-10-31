@@ -1,4 +1,4 @@
-#define XR_VERSION		"Version 0.3"
+#define XR_VERSION		"Version 0.4"
 
 /* All commands to the server must end in a newline */
 #define XR_CMD_POWER_ON		"xmPOW:ON0:XXX\n"
@@ -21,13 +21,33 @@
 /* What is the maximum number of channels I can handle? */
 #define XR_MAX_CHANNELS		255
 
+/*
+ * How many times through the channel listing updates should the favorite
+ * channels be updated too?
+ */
+#define XR_FAVORITE_REFRESH_COUNT		3
+
+/* Types */
+#define XR_ARTIST_TYPE		1
+#define XR_CHANNEL_TYPE		2
+#define XR_ALL_TYPE			3
+
 /* Default Server information. */
 #define SERV_HOST_ADDR		"127.0.0.1"
 #define SERV_TCP_PORT		3877
 
+/* Name of file to save favorites to */
+#define FAVORITESFILE		".ximbaradiorc"
+
 
 /* Debug Macro */
 #define DBGPrintf(msg) 		{ if (DEBUG) { printf msg ; } }
+
+/* Typedefs */
+typedef struct _categoryt {
+	char			*name;
+	GtkWidget	*clist;
+} CategoryT;
 
 #ifdef XR_CB_C
 
@@ -49,6 +69,10 @@ GtkWidget *XR_Status_Image = NULL;
 GtkWidget *XR_JumpTo_Window = NULL;
 GtkWidget *XR_JumpTo_StationID = NULL;
 GtkWidget *XR_JumpTo_StationName = NULL;
+GtkWidget *XR_Favorite_Channel_Window = NULL;
+GtkWidget *XR_Favorite_Channel_Label = NULL;
+GtkWidget *XR_Delete_Favorite_Popup = NULL;
+GtkWidget *XR_Delete_Favorite_Label = NULL;
 
 int XR_Clist_Sig_ID = -1;
 int XR_Favorites_Clist_Sig_ID = -1;
@@ -57,6 +81,12 @@ int XR_Category_Clist_Sig_ID = -1;
 int XR_SockFD;
 int XR_Channel_Listing_State = 0;
 char *XR_Radio_ID = NULL;
+GList *XR_List_Artist = NULL;
+GList *XR_List_Channel = NULL;
+GList *XR_List_Categories = NULL;
+int XR_Favorite_Refresh_Count = XR_FAVORITE_REFRESH_COUNT;
+char *delete_favorite_artist;
+int delete_favorite_row;
 
 int DEBUG = 0;
 
@@ -80,6 +110,10 @@ extern GtkWidget *XR_Status_Image;
 extern GtkWidget *XR_JumpTo_Window;
 extern GtkWidget *XR_JumpTo_StationID;
 extern GtkWidget *XR_JumpTo_StationName;
+extern GtkWidget *XR_Favorite_Channel_Window;
+extern GtkWidget *XR_Favorite_Channel_Label;
+extern GtkWidget *XR_Delete_Favorite_Popup;
+extern GtkWidget *XR_Delete_Favorite_Label;
 
 extern int XR_Clist_Sig_ID;
 extern int XR_Favorites_Clist_Sig_ID;
@@ -88,6 +122,12 @@ extern int XR_Category_Clist_Sig_ID;
 extern int XR_SockFD;
 extern int XR_Channel_Listing_State;
 extern char *XR_Radio_ID;
+extern GList *XR_List_Artist;
+extern GList *XR_List_Channel;
+extern GList *XR_List_Categories;
+extern int XR_Favorite_Refresh_Count;
+extern char *delete_favorite_artist;
+extern int delete_favorite_row;
 
 extern int DEBUG;
 
@@ -120,6 +160,9 @@ void XRUShowRadioID();
 void XRUJumpKeyPress();
 void XRUAddFavoriteArtist();
 void XRUAddFavoriteStation();
+void XRUSaveFavorites();
+void XRUReadFavorites();
+void XRUChannelRefreshFavorites();
 
 #else
 
@@ -146,5 +189,8 @@ extern void XRUShowRadioID();
 extern void XRUJumpKeyPress();
 extern void XRUAddFavoriteArtist();
 extern void XRUAddFavoriteStation();
+extern void XRUSaveFavorites();
+extern void XRUReadFavorites();
+extern void XRUChannelRefreshFavorites();
 
 #endif

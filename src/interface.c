@@ -39,7 +39,6 @@ create_window1 (void)
   GtkWidget *menuitem4_menu;
   GtkWidget *show_radio_id1;
   GtkWidget *about1;
-  GtkWidget *image12;
   GtkWidget *toolbar1;
   GtkWidget *tmp_toolbar_icon;
   GtkWidget *button13;
@@ -63,13 +62,13 @@ create_window1 (void)
   GtkWidget *category_entry;
   GtkWidget *label2;
   GtkWidget *label1;
-  GtkWidget *hbox2;
-  GtkWidget *host_ip_entry;
-  GtkWidget *host_status_image;
   GtkWidget *button16;
   GtkWidget *image24;
   GtkWidget *button17;
   GtkWidget *image23;
+  GtkWidget *host_status_image;
+  GtkWidget *host_ip_entry;
+  GtkWidget *image27;
   GtkWidget *notebook1;
   GtkWidget *scrolledwindow1;
   GtkWidget *clist1;
@@ -161,12 +160,6 @@ create_window1 (void)
   gtk_widget_set_name (about1, "about1");
   gtk_widget_show (about1);
   gtk_container_add (GTK_CONTAINER (menuitem4_menu), about1);
-
-  image12 = create_pixmap (window1, "banner.xpm");
-  gtk_widget_set_name (image12, "image12");
-  gtk_widget_show (image12);
-  gtk_box_pack_start (GTK_BOX (vbox1), image12, FALSE, TRUE, 0);
-  gtk_misc_set_alignment (GTK_MISC (image12), 0, 0.5);
 
   toolbar1 = gtk_toolbar_new ();
   gtk_widget_set_name (toolbar1, "toolbar1");
@@ -260,7 +253,7 @@ create_window1 (void)
 
   button8 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
                                 "gtk-refresh",
-                                NULL,
+                                "gtk-refresh",
                                 NULL, NULL, NULL, -1);
   gtk_widget_set_name (button8, "button8");
   gtk_widget_show (button8);
@@ -318,7 +311,7 @@ create_window1 (void)
   gtk_widget_set_name (button12, "button12");
   gtk_widget_show (button12);
 
-  table1 = gtk_table_new (5, 3, FALSE);
+  table1 = gtk_table_new (5, 4, FALSE);
   gtk_widget_set_name (table1, "table1");
   gtk_widget_show (table1);
   gtk_box_pack_start (GTK_BOX (vbox1), table1, FALSE, FALSE, 0);
@@ -413,27 +406,6 @@ create_window1 (void)
   gtk_misc_set_alignment (GTK_MISC (label1), 1, 0.5);
   gtk_misc_set_padding (GTK_MISC (label1), 4, 0);
 
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_set_name (hbox2, "hbox2");
-  gtk_widget_show (hbox2);
-  gtk_table_attach (GTK_TABLE (table1), hbox2, 1, 2, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (GTK_FILL), 0, 0);
-
-  host_ip_entry = gtk_entry_new ();
-  gtk_widget_set_name (host_ip_entry, "host_ip_entry");
-  gtk_widget_show (host_ip_entry);
-  gtk_box_pack_start (GTK_BOX (hbox2), host_ip_entry, TRUE, TRUE, 0);
-  GTK_WIDGET_UNSET_FLAGS (host_ip_entry, GTK_CAN_FOCUS);
-  gtk_editable_set_editable (GTK_EDITABLE (host_ip_entry), FALSE);
-  gtk_entry_set_has_frame (GTK_ENTRY (host_ip_entry), FALSE);
-
-  host_status_image = gtk_image_new_from_stock ("gtk-remove", GTK_ICON_SIZE_BUTTON);
-  gtk_widget_set_name (host_status_image, "host_status_image");
-  gtk_widget_show (host_status_image);
-  gtk_box_pack_start (GTK_BOX (hbox2), host_status_image, TRUE, TRUE, 0);
-  gtk_widget_set_sensitive (host_status_image, FALSE);
-
   button16 = gtk_button_new ();
   gtk_widget_set_name (button16, "button16");
   gtk_widget_show (button16);
@@ -441,6 +413,7 @@ create_window1 (void)
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_tooltips_set_tip (tooltips, button16, _("Add to Favorites"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button16), GTK_RELIEF_NONE);
 
   image24 = gtk_image_new_from_stock ("gtk-add", GTK_ICON_SIZE_SMALL_TOOLBAR);
   gtk_widget_set_name (image24, "image24");
@@ -454,11 +427,38 @@ create_window1 (void)
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_tooltips_set_tip (tooltips, button17, _("Add to Favorites"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button17), GTK_RELIEF_NONE);
 
   image23 = gtk_image_new_from_stock ("gtk-add", GTK_ICON_SIZE_SMALL_TOOLBAR);
   gtk_widget_set_name (image23, "image23");
   gtk_widget_show (image23);
   gtk_container_add (GTK_CONTAINER (button17), image23);
+
+  host_status_image = gtk_image_new_from_stock ("gtk-remove", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_name (host_status_image, "host_status_image");
+  gtk_widget_show (host_status_image);
+  gtk_table_attach (GTK_TABLE (table1), host_status_image, 2, 3, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+  gtk_widget_set_sensitive (host_status_image, FALSE);
+
+  host_ip_entry = gtk_entry_new ();
+  gtk_widget_set_name (host_ip_entry, "host_ip_entry");
+  gtk_widget_show (host_ip_entry);
+  gtk_table_attach (GTK_TABLE (table1), host_ip_entry, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  GTK_WIDGET_UNSET_FLAGS (host_ip_entry, GTK_CAN_FOCUS);
+  gtk_editable_set_editable (GTK_EDITABLE (host_ip_entry), FALSE);
+  gtk_entry_set_has_frame (GTK_ENTRY (host_ip_entry), FALSE);
+
+  image27 = create_pixmap (window1, "banner.xpm");
+  gtk_widget_set_name (image27, "image27");
+  gtk_widget_show (image27);
+  gtk_table_attach (GTK_TABLE (table1), image27, 3, 4, 0, 5,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+  gtk_misc_set_alignment (GTK_MISC (image27), 0, 0.5);
 
   notebook1 = gtk_notebook_new ();
   gtk_widget_set_name (notebook1, "notebook1");
@@ -763,18 +763,18 @@ create_window1 (void)
   g_signal_connect_swapped ((gpointer) category_entry, "realize",
                             G_CALLBACK (on_category_entry_realize),
                             GTK_OBJECT (category_entry));
-  g_signal_connect_swapped ((gpointer) host_ip_entry, "realize",
-                            G_CALLBACK (on_host_ip_entry_realize),
-                            GTK_OBJECT (host_ip_entry));
-  g_signal_connect_swapped ((gpointer) host_status_image, "realize",
-                            G_CALLBACK (on_host_status_image_realize),
-                            GTK_OBJECT (host_status_image));
   g_signal_connect ((gpointer) button16, "clicked",
                     G_CALLBACK (on_button16_clicked),
                     NULL);
   g_signal_connect ((gpointer) button17, "clicked",
                     G_CALLBACK (on_button17_clicked),
                     NULL);
+  g_signal_connect_swapped ((gpointer) host_status_image, "realize",
+                            G_CALLBACK (on_host_status_image_realize),
+                            GTK_OBJECT (host_status_image));
+  g_signal_connect_swapped ((gpointer) host_ip_entry, "realize",
+                            G_CALLBACK (on_host_ip_entry_realize),
+                            GTK_OBJECT (host_ip_entry));
   g_signal_connect_swapped ((gpointer) notebook1, "realize",
                             G_CALLBACK (on_notebook1_realize),
                             GTK_OBJECT (notebook1));
@@ -793,6 +793,9 @@ create_window1 (void)
   g_signal_connect_swapped ((gpointer) clist1, "realize",
                             G_CALLBACK (on_clist4_realize),
                             GTK_OBJECT (clist4));
+  g_signal_connect ((gpointer) clist1, "realize",
+                    G_CALLBACK (on_setup_realize),
+                    NULL);
   g_signal_connect ((gpointer) clist2, "select_row",
                     G_CALLBACK (on_clist2_select_row),
                     NULL);
@@ -814,7 +817,6 @@ create_window1 (void)
   GLADE_HOOKUP_OBJECT (window1, menuitem4_menu, "menuitem4_menu");
   GLADE_HOOKUP_OBJECT (window1, show_radio_id1, "show_radio_id1");
   GLADE_HOOKUP_OBJECT (window1, about1, "about1");
-  GLADE_HOOKUP_OBJECT (window1, image12, "image12");
   GLADE_HOOKUP_OBJECT (window1, toolbar1, "toolbar1");
   GLADE_HOOKUP_OBJECT (window1, button13, "button13");
   GLADE_HOOKUP_OBJECT (window1, button3, "button3");
@@ -837,13 +839,13 @@ create_window1 (void)
   GLADE_HOOKUP_OBJECT (window1, category_entry, "category_entry");
   GLADE_HOOKUP_OBJECT (window1, label2, "label2");
   GLADE_HOOKUP_OBJECT (window1, label1, "label1");
-  GLADE_HOOKUP_OBJECT (window1, hbox2, "hbox2");
-  GLADE_HOOKUP_OBJECT (window1, host_ip_entry, "host_ip_entry");
-  GLADE_HOOKUP_OBJECT (window1, host_status_image, "host_status_image");
   GLADE_HOOKUP_OBJECT (window1, button16, "button16");
   GLADE_HOOKUP_OBJECT (window1, image24, "image24");
   GLADE_HOOKUP_OBJECT (window1, button17, "button17");
   GLADE_HOOKUP_OBJECT (window1, image23, "image23");
+  GLADE_HOOKUP_OBJECT (window1, host_status_image, "host_status_image");
+  GLADE_HOOKUP_OBJECT (window1, host_ip_entry, "host_ip_entry");
+  GLADE_HOOKUP_OBJECT (window1, image27, "image27");
   GLADE_HOOKUP_OBJECT (window1, notebook1, "notebook1");
   GLADE_HOOKUP_OBJECT (window1, scrolledwindow1, "scrolledwindow1");
   GLADE_HOOKUP_OBJECT (window1, clist1, "clist1");
@@ -913,7 +915,7 @@ create_dialog2 (void)
   gtk_widget_show (vbox4);
   gtk_box_pack_start (GTK_BOX (dialog_vbox2), vbox4, TRUE, TRUE, 0);
 
-  image16 = create_pixmap (dialog2, "banner.xpm");
+  image16 = create_pixmap (dialog2, "banner-horiz-lion-about.xpm");
   gtk_widget_set_name (image16, "image16");
   gtk_widget_show (image16);
   gtk_box_pack_start (GTK_BOX (vbox4), image16, FALSE, FALSE, 0);
@@ -968,7 +970,7 @@ create_dialog1 (void)
   GtkWidget *dialog1;
   GtkWidget *dialog_vbox3;
   GtkWidget *vbox5;
-  GtkWidget *image17;
+  GtkWidget *image33;
   GtkWidget *label9;
   GtkWidget *dialog_action_area3;
   GtkWidget *closebutton2;
@@ -986,10 +988,10 @@ create_dialog1 (void)
   gtk_widget_show (vbox5);
   gtk_box_pack_start (GTK_BOX (dialog_vbox3), vbox5, TRUE, TRUE, 0);
 
-  image17 = create_pixmap (dialog1, "banner.xpm");
-  gtk_widget_set_name (image17, "image17");
-  gtk_widget_show (image17);
-  gtk_box_pack_start (GTK_BOX (vbox5), image17, FALSE, FALSE, 0);
+  image33 = create_pixmap (dialog1, "banner-horiz.xpm");
+  gtk_widget_set_name (image33, "image33");
+  gtk_widget_show (image33);
+  gtk_box_pack_start (GTK_BOX (vbox5), image33, FALSE, FALSE, 0);
 
   label9 = gtk_label_new ("");
   gtk_widget_set_name (label9, "label9");
@@ -1019,7 +1021,7 @@ create_dialog1 (void)
   GLADE_HOOKUP_OBJECT_NO_REF (dialog1, dialog1, "dialog1");
   GLADE_HOOKUP_OBJECT_NO_REF (dialog1, dialog_vbox3, "dialog_vbox3");
   GLADE_HOOKUP_OBJECT (dialog1, vbox5, "vbox5");
-  GLADE_HOOKUP_OBJECT (dialog1, image17, "image17");
+  GLADE_HOOKUP_OBJECT (dialog1, image33, "image33");
   GLADE_HOOKUP_OBJECT (dialog1, label9, "label9");
   GLADE_HOOKUP_OBJECT_NO_REF (dialog1, dialog_action_area3, "dialog_action_area3");
   GLADE_HOOKUP_OBJECT (dialog1, closebutton2, "closebutton2");
@@ -1059,7 +1061,7 @@ create_dialog3 (void)
   gtk_widget_show (vbox6);
   gtk_box_pack_start (GTK_BOX (dialog_vbox4), vbox6, TRUE, TRUE, 0);
 
-  image19 = create_pixmap (dialog3, "banner.xpm");
+  image19 = create_pixmap (dialog3, "banner-horiz.xpm");
   gtk_widget_set_name (image19, "image19");
   gtk_widget_show (image19);
   gtk_box_pack_start (GTK_BOX (vbox6), image19, FALSE, FALSE, 0);
@@ -1175,5 +1177,171 @@ create_dialog3 (void)
   GLADE_HOOKUP_OBJECT (dialog3, cancelbutton1, "cancelbutton1");
 
   return dialog3;
+}
+
+GtkWidget*
+create_favorites (void)
+{
+  GtkWidget *favorites;
+  GtkWidget *hbox3;
+  GtkWidget *label42;
+  GtkWidget *button18;
+  GtkWidget *image26;
+  GtkWidget *button19;
+  GtkWidget *image32;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  favorites = gtk_window_new (GTK_WINDOW_POPUP);
+  gtk_widget_set_name (favorites, "favorites");
+  gtk_window_set_title (GTK_WINDOW (favorites), _("Favorite Artist Now Playing"));
+  gtk_window_set_position (GTK_WINDOW (favorites), GTK_WIN_POS_CENTER);
+  gtk_window_set_modal (GTK_WINDOW (favorites), TRUE);
+
+  hbox3 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_set_name (hbox3, "hbox3");
+  gtk_widget_show (hbox3);
+  gtk_container_add (GTK_CONTAINER (favorites), hbox3);
+
+  label42 = gtk_label_new (_("Notice for \nFavorite Artist \non a specified channel"));
+  gtk_widget_set_name (label42, "label42");
+  gtk_widget_show (label42);
+  gtk_box_pack_start (GTK_BOX (hbox3), label42, TRUE, TRUE, 0);
+  gtk_misc_set_padding (GTK_MISC (label42), 5, 5);
+
+  button18 = gtk_button_new ();
+  gtk_widget_set_name (button18, "button18");
+  gtk_widget_show (button18);
+  gtk_box_pack_start (GTK_BOX (hbox3), button18, FALSE, FALSE, 0);
+  GTK_WIDGET_SET_FLAGS (button18, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button18, _("Jump To Station"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button18), GTK_RELIEF_NONE);
+
+  image26 = gtk_image_new_from_stock ("gtk-jump-to", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_name (image26, "image26");
+  gtk_widget_show (image26);
+  gtk_container_add (GTK_CONTAINER (button18), image26);
+
+  button19 = gtk_button_new ();
+  gtk_widget_set_name (button19, "button19");
+  gtk_widget_show (button19);
+  gtk_box_pack_start (GTK_BOX (hbox3), button19, FALSE, FALSE, 0);
+  GTK_WIDGET_SET_FLAGS (button19, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button19, _("Skip it"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button19), GTK_RELIEF_NONE);
+
+  image32 = gtk_image_new_from_stock ("gtk-cancel", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_name (image32, "image32");
+  gtk_widget_show (image32);
+  gtk_container_add (GTK_CONTAINER (button19), image32);
+
+  g_signal_connect_swapped ((gpointer) favorites, "realize",
+                            G_CALLBACK (on_favorites_realize),
+                            GTK_OBJECT (favorites));
+  g_signal_connect_swapped ((gpointer) favorites, "realize",
+                            G_CALLBACK (on_entry3_realize),
+                            GTK_OBJECT (label42));
+  g_signal_connect ((gpointer) button18, "clicked",
+                    G_CALLBACK (on_button18_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button19, "clicked",
+                    G_CALLBACK (on_button19_clicked),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (favorites, favorites, "favorites");
+  GLADE_HOOKUP_OBJECT (favorites, hbox3, "hbox3");
+  GLADE_HOOKUP_OBJECT (favorites, label42, "label42");
+  GLADE_HOOKUP_OBJECT (favorites, button18, "button18");
+  GLADE_HOOKUP_OBJECT (favorites, image26, "image26");
+  GLADE_HOOKUP_OBJECT (favorites, button19, "button19");
+  GLADE_HOOKUP_OBJECT (favorites, image32, "image32");
+  GLADE_HOOKUP_OBJECT_NO_REF (favorites, tooltips, "tooltips");
+
+  return favorites;
+}
+
+GtkWidget*
+create_deletefavorites (void)
+{
+  GtkWidget *deletefavorites;
+  GtkWidget *hbox4;
+  GtkWidget *label43;
+  GtkWidget *button20;
+  GtkWidget *image30;
+  GtkWidget *button21;
+  GtkWidget *image31;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  deletefavorites = gtk_window_new (GTK_WINDOW_POPUP);
+  gtk_widget_set_name (deletefavorites, "deletefavorites");
+  gtk_window_set_title (GTK_WINDOW (deletefavorites), _("Delete Favorite Artist?"));
+  gtk_window_set_position (GTK_WINDOW (deletefavorites), GTK_WIN_POS_CENTER);
+  gtk_window_set_modal (GTK_WINDOW (deletefavorites), TRUE);
+
+  hbox4 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_set_name (hbox4, "hbox4");
+  gtk_widget_show (hbox4);
+  gtk_container_add (GTK_CONTAINER (deletefavorites), hbox4);
+
+  label43 = gtk_label_new (_("Notice to Delete\nArtist \nfrom Favorites List"));
+  gtk_widget_set_name (label43, "label43");
+  gtk_widget_show (label43);
+  gtk_box_pack_start (GTK_BOX (hbox4), label43, TRUE, TRUE, 0);
+  gtk_misc_set_padding (GTK_MISC (label43), 5, 5);
+
+  button20 = gtk_button_new ();
+  gtk_widget_set_name (button20, "button20");
+  gtk_widget_show (button20);
+  gtk_box_pack_start (GTK_BOX (hbox4), button20, FALSE, FALSE, 0);
+  GTK_WIDGET_SET_FLAGS (button20, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button20, _("Delete This Artist"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button20), GTK_RELIEF_NONE);
+
+  image30 = gtk_image_new_from_stock ("gtk-apply", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_name (image30, "image30");
+  gtk_widget_show (image30);
+  gtk_container_add (GTK_CONTAINER (button20), image30);
+
+  button21 = gtk_button_new ();
+  gtk_widget_set_name (button21, "button21");
+  gtk_widget_show (button21);
+  gtk_box_pack_start (GTK_BOX (hbox4), button21, FALSE, FALSE, 0);
+  GTK_WIDGET_SET_FLAGS (button21, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button21, _("Don't Delete"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button21), GTK_RELIEF_NONE);
+
+  image31 = gtk_image_new_from_stock ("gtk-cancel", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_name (image31, "image31");
+  gtk_widget_show (image31);
+  gtk_container_add (GTK_CONTAINER (button21), image31);
+
+  g_signal_connect_swapped ((gpointer) deletefavorites, "realize",
+                            G_CALLBACK (on_deletefavorites_realize),
+                            GTK_OBJECT (deletefavorites));
+  g_signal_connect_swapped ((gpointer) deletefavorites, "realize",
+                            G_CALLBACK (on_deletelabel_realize),
+                            GTK_OBJECT (label43));
+  g_signal_connect ((gpointer) button20, "clicked",
+                    G_CALLBACK (on_button20_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button21, "clicked",
+                    G_CALLBACK (on_button21_clicked),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (deletefavorites, deletefavorites, "deletefavorites");
+  GLADE_HOOKUP_OBJECT (deletefavorites, hbox4, "hbox4");
+  GLADE_HOOKUP_OBJECT (deletefavorites, label43, "label43");
+  GLADE_HOOKUP_OBJECT (deletefavorites, button20, "button20");
+  GLADE_HOOKUP_OBJECT (deletefavorites, image30, "image30");
+  GLADE_HOOKUP_OBJECT (deletefavorites, button21, "button21");
+  GLADE_HOOKUP_OBJECT (deletefavorites, image31, "image31");
+  GLADE_HOOKUP_OBJECT_NO_REF (deletefavorites, tooltips, "tooltips");
+
+  return deletefavorites;
 }
 

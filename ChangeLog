@@ -2,3 +2,14 @@
 0.2 - Bug fixes, but still broke.
 0.3 - Fixed station listing window, various crashes.  First truly usable
       version.
+0.4:
+   Added Favorite Artists/Channels - display, add, delete, save, load.
+   Added notification when favorite artists are playing on another station.
+   Added Category tabs.
+   Added Favorites Refresh - timed and on demand.
+   Increased scanning of favorite channels.
+   Fixed display bug that chopped last character off of song title.
+   Added a little more documentation to explain how to build and run.
+   Fixed OpenXM XMDaemon select() handling to not chew up CPU time.
+   Fixed pixmap handling to work when installed using --prefix with
+      "configure"

@@ -80,7 +80,7 @@ void
 XRChannelRefresh                       (GtkButton       *button,
                                         gpointer         user_data)
 {
-	XRUChannelRefresh();
+	XRUChannelRefreshFavorites();
 }
 
 
@@ -432,7 +432,7 @@ on_clist4_realize                      (GtkWidget       *widget,
                                         gpointer         user_data)
 {
 	XR_Favorites_Artist_Listing_Window = widget;
-	gtk_clist_set_sort_column(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 4);
+	gtk_clist_set_sort_column(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 1);
 	gtk_clist_set_auto_sort(GTK_CLIST(XR_Favorites_Artist_Listing_Window), TRUE);
 	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
 		0, FALSE);
@@ -470,5 +470,111 @@ on_clist4_select_row                   (GtkCList        *clist,
                                         GdkEvent        *event,
                                         gpointer         user_data)
 {
+	int	channel;
+	char	msg[1024];
+
+	/* Don't do this if the window is already visible. */
+	if ( XR_Delete_Favorite_Popup != NULL )
+		if ( GTK_WIDGET_VISIBLE(XR_Delete_Favorite_Popup) ) 
+			return;
+
+	/* Save the data for the current selection. */
+	delete_favorite_artist = gtk_clist_get_row_data(GTK_CLIST(clist), row);
+	delete_favorite_row = row;
+
+	/* If its not yet available, create the popup dialog. */
+	if ( XR_Delete_Favorite_Popup == NULL )
+	{
+		XR_Delete_Favorite_Popup = create_deletefavorites();
+		gtk_widget_realize(XR_Delete_Favorite_Popup);
+	}
+
+	/* Populate the dialog and display it. */
+	sprintf(msg, "Delete\n%s\nfrom Favorites?", delete_favorite_artist);
+	gtk_label_set_text(GTK_LABEL(XR_Delete_Favorite_Label), msg);
+	gtk_label_set_justify(GTK_LABEL(XR_Delete_Favorite_Label), 
+		GTK_JUSTIFY_CENTER);
+	gtk_widget_show(XR_Delete_Favorite_Popup);
+}
+
+
+void
+on_setup_realize                       (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XRUReadFavorites();
+}
+
+
+void
+on_button18_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	XRUJumpToFavoriteChannel();
+}
+
+
+void
+on_button19_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	gtk_widget_hide(XR_Favorite_Channel_Window);
+}
+
+
+void
+on_entry3_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Favorite_Channel_Label = widget;
+}
+
+
+void
+on_favorites_realize                   (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Favorite_Channel_Window = widget;
+}
+
+
+
+void
+on_deletefavorites_realize             (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_deletelabel_realize                 (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Delete_Favorite_Label = widget;
+}
+
+
+void
+on_button20_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	if ( XR_Delete_Favorite_Popup != NULL )
+	{
+		gtk_clist_remove(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+			delete_favorite_row);
+		g_list_remove( XR_List_Artist, delete_favorite_artist);
+		gtk_widget_hide(XR_Delete_Favorite_Popup);
+		XRUSaveFavorites();
+	}
+}
+
+
+void
+on_button21_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	if ( XR_Delete_Favorite_Popup != NULL )
+		gtk_widget_hide(XR_Delete_Favorite_Popup);
 }
 

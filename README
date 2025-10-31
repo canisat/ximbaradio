@@ -6,6 +6,8 @@ they provide a user the ability to control an XMPCR USB-connected XM Radio.
 Ximba Radio provides all the same basic features that the Windows-based XMPCR 
 application provides.
 
+For more information on XMPCR devices, see http://www.xmradio.com/xmpcr/
+
 
 To Build
 ----------
@@ -13,4 +15,45 @@ To Build
 make
 make install
 
-Use the --prefix option to specify an installation directory.  
+Use the --prefix option to specify an installation directory.  By default
+the "make install" will install into system directories. If you use the
+default or specify some other system directory with --prefix you'll need to
+run the "make install" part as the root user.
+
+
+To Use
+------------
+First, you need to get a copy of OpenXM from Sourceforge.net:
+http://sourceforge.net/projects/xmpcr/
+
+Unless version 2.0 has been released, you'll want to grab the version from
+CVS.
+
+You need to read the doc/Install.linux.txt file to learn how to configure 
+and start the XMDaemon.  Its not hard, really.  The XMPCR device is USB
+connected so most of the configuration has to do with finding where the
+device gets configured in the USB system.  Note that XMDaemon does accept
+command line options - try "XMDaemon -h" for help with those.  In general,
+you need only specify the USB device to use.
+
+When the XMDaemon is running you can start the application:
+
+% ximbaradio
+
+And that's it.  Favorites are saved in a text file - $HOME/.ximbaradiorc.
+You can edit that by hand, but using the interface is easier (and safer).
+Changes to the Favorites are saved immediately, so if the application
+crashes, you won't lose your favorites data.
+
+BUGS
+----------
+There may be a problem with making a selection from a list at the exact
+moment that list is being updated.  It may cause a crash.  A potential fix
+was added for this, but its not clear if the fix really addresses the
+problem.  If the application crashes, just restart it.  
+
+Enjoy!
+
+Michael J. Hammel
+mjhammel@graphics-muse.org
+www.graphics-muse.com/ximba/ximbaradio.html

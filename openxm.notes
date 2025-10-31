@@ -1,24 +1,15 @@
 OpenXM Server:
 -------------------------
+No Todo items for now.
+
+OpenXM Bugs?
+-------------------------
 1. Read 33 bytes before XM Radio registration is active, 40 after.
 2. Returns last retrieved channel information for channels that have no
    data in them.  Should return blank data or a return code of some kind.
-3. After extended use, starts to return only current channel info for
+3. After extended use, may start to return only current channel info for
    xmCHA:NF0: if "XXX" is specified as a channel number.
-4. Not all commands return 1/0.  They should be consistant.
-5. There is no command implemented (though its spec'd in the comments) for
-   "get all".
-6. Strings returned are truncated.  To fix this, change the protocol for
-   queries to be:
-   a. <length of data> \n
-   b. <data> \n
-   So its two lines, one with the length of the data to be returned and the
-   second with the real data.
-   Note:  XMPCR.pm needs to return full strings too - it probably doesn't
-   yet.
-7. Connect/disconnect cause daemon to start chewing up CPU.  
-8. Should Ctrl-C be required twice to kill server?
-9. Daemon should not run with debug by default.
+4. Do all commands return 1/0?  They should be consistant.
 
 
 Ximba Radio:
@@ -26,21 +17,20 @@ Ximba Radio:
 1. Add JumpToStationName code.
 
 Features to be added:
-1. Tabs for "by category" listings - add new tabs as new categories are
-   encountered.  "Favorites" tab has two subnotebooks, one for stations
-   and one for artists.
-2. New Column: Usage - keeps track of percent usage vs other stations.  How
+1. New Column: Usage - keeps track of percent usage vs other stations.  How
    to calculate?  By time spent on a channel or by number of times that
    station is selected?
-3. Notify when a favorite artist is playing on some station other
-   than the current one, allow quick jump to that station.
-4. Start/Stop Daemon (in File menu).
-5. Add Preferences:
+2. Start/Stop Daemon (in File menu).
+3. Add Preferences:
    a. Configure daemon host system
    b. Read/Write a configuration file for local daemon management
    c. Configure frequency of queries to server for performance - more
       frequent queries (and larger channel count per querie) for fast
       systems/networks, less frequent/smaller count for slower ones.
+
+Extension:
+1. Reflector - daemon based on GStreamer to pipe audio to remote locations.
+2. Volume control.
 
 Long term:
 1. SLIK based skin interface (or something like mplayer - maybe as a plugin?).

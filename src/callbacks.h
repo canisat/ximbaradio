@@ -220,3 +220,43 @@ on_clist4_select_row                   (GtkCList        *clist,
                                         gint             column,
                                         GdkEvent        *event,
                                         gpointer         user_data);
+
+void
+on_setup_realize                       (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_button18_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_button19_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_entry3_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_favorites_realize                   (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_entry3_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_deletefavorites_realize             (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_deletelabel_realize                 (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_button20_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_button21_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
