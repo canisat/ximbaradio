@@ -41,9 +41,9 @@ create_window1 (void)
   GtkWidget *about1;
   GtkWidget *image12;
   GtkWidget *toolbar1;
+  GtkWidget *tmp_toolbar_icon;
   GtkWidget *button13;
   GtkWidget *button3;
-  GtkWidget *tmp_toolbar_icon;
   GtkWidget *button4;
   GtkWidget *button5;
   GtkWidget *button6;
@@ -66,6 +66,11 @@ create_window1 (void)
   GtkWidget *hbox2;
   GtkWidget *host_ip_entry;
   GtkWidget *host_status_image;
+  GtkWidget *button16;
+  GtkWidget *image24;
+  GtkWidget *button17;
+  GtkWidget *image23;
+  GtkWidget *notebook1;
   GtkWidget *scrolledwindow1;
   GtkWidget *clist1;
   GtkWidget *label15;
@@ -73,7 +78,39 @@ create_window1 (void)
   GtkWidget *label17;
   GtkWidget *label18;
   GtkWidget *label19;
+  GtkWidget *label35;
+  GtkWidget *label34;
+  GtkWidget *vbox7;
+  GtkWidget *scrolledwindow2;
+  GtkWidget *clist2;
+  GtkWidget *label22;
+  GtkWidget *label23;
+  GtkWidget *label24;
+  GtkWidget *label25;
+  GtkWidget *label26;
+  GtkWidget *label27;
+  GtkWidget *scrolledwindow4;
+  GtkWidget *clist4;
+  GtkWidget *label36;
+  GtkWidget *label37;
+  GtkWidget *label38;
+  GtkWidget *label39;
+  GtkWidget *label40;
+  GtkWidget *label41;
+  GtkWidget *label20;
+  GtkWidget *scrolledwindow3;
+  GtkWidget *clist3;
+  GtkWidget *label28;
+  GtkWidget *label29;
+  GtkWidget *label30;
+  GtkWidget *label31;
+  GtkWidget *label32;
+  GtkWidget *label33;
+  GtkWidget *label21;
   GtkAccelGroup *accel_group;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
 
   accel_group = gtk_accel_group_new ();
 
@@ -137,20 +174,28 @@ create_window1 (void)
   gtk_box_pack_start (GTK_BOX (vbox1), toolbar1, FALSE, FALSE, 0);
   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar1), GTK_TOOLBAR_ICONS);
 
-  button13 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
-                                "gtk-apply",
+  tmp_toolbar_icon = gtk_image_new_from_stock ("gtk-apply", gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1)));
+  button13 = gtk_toolbar_append_element (GTK_TOOLBAR (toolbar1),
+                                GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
-                                NULL, NULL, NULL, -1);
+                                _("button13"),
+                                _("Connect to server."), NULL,
+                                tmp_toolbar_icon, NULL, NULL);
+  gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button13, "button13");
   gtk_widget_show (button13);
   gtk_widget_add_accelerator (button13, "clicked", accel_group,
                               GDK_O, GDK_CONTROL_MASK,
                               GTK_ACCEL_VISIBLE);
 
-  button3 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
-                                "gtk-close",
+  tmp_toolbar_icon = gtk_image_new_from_stock ("gtk-cancel", gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1)));
+  button3 = gtk_toolbar_append_element (GTK_TOOLBAR (toolbar1),
+                                GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
-                                NULL, NULL, NULL, -1);
+                                _("button3"),
+                                _("Disconnect from server."), NULL,
+                                tmp_toolbar_icon, NULL, NULL);
+  gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button3, "button3");
   gtk_widget_show (button3);
   gtk_widget_add_accelerator (button3, "clicked", accel_group,
@@ -162,7 +207,7 @@ create_window1 (void)
                                 GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
                                 _("button4"),
-                                NULL, NULL,
+                                _("Channel Up."), NULL,
                                 tmp_toolbar_icon, NULL, NULL);
   gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button4, "button4");
@@ -176,7 +221,7 @@ create_window1 (void)
                                 GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
                                 _("button5"),
-                                NULL, NULL,
+                                _("Channel Down."), NULL,
                                 tmp_toolbar_icon, NULL, NULL);
   gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button5, "button5");
@@ -185,20 +230,28 @@ create_window1 (void)
                               GDK_D, GDK_CONTROL_MASK,
                               GTK_ACCEL_VISIBLE);
 
-  button6 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
-                                "gtk-jump-to",
+  tmp_toolbar_icon = gtk_image_new_from_stock ("gtk-jump-to", gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1)));
+  button6 = gtk_toolbar_append_element (GTK_TOOLBAR (toolbar1),
+                                GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
-                                NULL, NULL, NULL, -1);
+                                _("button6"),
+                                _("Jump to Channel."), NULL,
+                                tmp_toolbar_icon, NULL, NULL);
+  gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button6, "button6");
   gtk_widget_show (button6);
   gtk_widget_add_accelerator (button6, "clicked", accel_group,
                               GDK_J, GDK_CONTROL_MASK,
                               GTK_ACCEL_VISIBLE);
 
-  button7 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
-                                "gtk-go-back",
+  tmp_toolbar_icon = gtk_image_new_from_stock ("gtk-go-back", gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1)));
+  button7 = gtk_toolbar_append_element (GTK_TOOLBAR (toolbar1),
+                                GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
-                                NULL, NULL, NULL, -1);
+                                _("button7"),
+                                _("Previous Channel."), NULL,
+                                tmp_toolbar_icon, NULL, NULL);
+  gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button7, "button7");
   gtk_widget_show (button7);
   gtk_widget_add_accelerator (button7, "clicked", accel_group,
@@ -212,49 +265,63 @@ create_window1 (void)
   gtk_widget_set_name (button8, "button8");
   gtk_widget_show (button8);
 
-  button9 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
-                                "gtk-yes",
+  tmp_toolbar_icon = gtk_image_new_from_stock ("gtk-yes", gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1)));
+  button9 = gtk_toolbar_append_element (GTK_TOOLBAR (toolbar1),
+                                GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
-                                NULL, NULL, NULL, -1);
+                                _("button9"),
+                                _("Mute off."), NULL,
+                                tmp_toolbar_icon, NULL, NULL);
+  gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button9, "button9");
   gtk_widget_show (button9);
   gtk_widget_add_accelerator (button9, "clicked", accel_group,
                               GDK_O, GDK_CONTROL_MASK | GDK_SHIFT_MASK,
                               GTK_ACCEL_VISIBLE);
 
-  button10 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
-                                "gtk-no",
+  tmp_toolbar_icon = gtk_image_new_from_stock ("gtk-no", gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1)));
+  button10 = gtk_toolbar_append_element (GTK_TOOLBAR (toolbar1),
+                                GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
-                                NULL, NULL, NULL, -1);
+                                _("button10"),
+                                _("Mute on."), NULL,
+                                tmp_toolbar_icon, NULL, NULL);
+  gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button10, "button10");
   gtk_widget_show (button10);
   gtk_widget_add_accelerator (button10, "clicked", accel_group,
                               GDK_M, GDK_CONTROL_MASK | GDK_SHIFT_MASK,
                               GTK_ACCEL_VISIBLE);
 
-  button11 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
-                                "gtk-justify-fill",
+  tmp_toolbar_icon = gtk_image_new_from_stock ("gtk-justify-fill", gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1)));
+  button11 = gtk_toolbar_append_element (GTK_TOOLBAR (toolbar1),
+                                GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
-                                NULL, NULL, NULL, -1);
+                                _("button11"),
+                                _("Toggle List Windows."), NULL,
+                                tmp_toolbar_icon, NULL, NULL);
+  gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button11, "button11");
   gtk_widget_show (button11);
   gtk_widget_add_accelerator (button11, "clicked", accel_group,
                               GDK_L, GDK_CONTROL_MASK,
                               GTK_ACCEL_VISIBLE);
 
-  button12 = gtk_toolbar_insert_stock (GTK_TOOLBAR (toolbar1),
-                                "gtk-preferences",
+  tmp_toolbar_icon = gtk_image_new_from_stock ("gtk-preferences", gtk_toolbar_get_icon_size (GTK_TOOLBAR (toolbar1)));
+  button12 = gtk_toolbar_append_element (GTK_TOOLBAR (toolbar1),
+                                GTK_TOOLBAR_CHILD_BUTTON,
                                 NULL,
-                                NULL, NULL, NULL, -1);
+                                _("button12"),
+                                _("Preferences."), NULL,
+                                tmp_toolbar_icon, NULL, NULL);
+  gtk_label_set_use_underline (GTK_LABEL (((GtkToolbarChild*) (g_list_last (GTK_TOOLBAR (toolbar1)->children)->data))->label), TRUE);
   gtk_widget_set_name (button12, "button12");
   gtk_widget_show (button12);
 
-  table1 = gtk_table_new (5, 2, FALSE);
+  table1 = gtk_table_new (5, 3, FALSE);
   gtk_widget_set_name (table1, "table1");
   gtk_widget_show (table1);
   gtk_box_pack_start (GTK_BOX (vbox1), table1, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (table1), 4);
-  gtk_table_set_col_spacings (GTK_TABLE (table1), 10);
 
   artist_entry = gtk_entry_new ();
   gtk_widget_set_name (artist_entry, "artist_entry");
@@ -367,13 +434,45 @@ create_window1 (void)
   gtk_box_pack_start (GTK_BOX (hbox2), host_status_image, TRUE, TRUE, 0);
   gtk_widget_set_sensitive (host_status_image, FALSE);
 
+  button16 = gtk_button_new ();
+  gtk_widget_set_name (button16, "button16");
+  gtk_widget_show (button16);
+  gtk_table_attach (GTK_TABLE (table1), button16, 2, 3, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, button16, _("Add to Favorites"), NULL);
+
+  image24 = gtk_image_new_from_stock ("gtk-add", GTK_ICON_SIZE_SMALL_TOOLBAR);
+  gtk_widget_set_name (image24, "image24");
+  gtk_widget_show (image24);
+  gtk_container_add (GTK_CONTAINER (button16), image24);
+
+  button17 = gtk_button_new ();
+  gtk_widget_set_name (button17, "button17");
+  gtk_widget_show (button17);
+  gtk_table_attach (GTK_TABLE (table1), button17, 2, 3, 3, 4,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, button17, _("Add to Favorites"), NULL);
+
+  image23 = gtk_image_new_from_stock ("gtk-add", GTK_ICON_SIZE_SMALL_TOOLBAR);
+  gtk_widget_set_name (image23, "image23");
+  gtk_widget_show (image23);
+  gtk_container_add (GTK_CONTAINER (button17), image23);
+
+  notebook1 = gtk_notebook_new ();
+  gtk_widget_set_name (notebook1, "notebook1");
+  gtk_widget_show (notebook1);
+  gtk_box_pack_start (GTK_BOX (vbox1), notebook1, FALSE, TRUE, 0);
+  gtk_notebook_set_scrollable (GTK_NOTEBOOK (notebook1), TRUE);
+
   scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_set_name (scrolledwindow1, "scrolledwindow1");
   gtk_widget_show (scrolledwindow1);
-  gtk_box_pack_start (GTK_BOX (vbox1), scrolledwindow1, FALSE, TRUE, 0);
+  gtk_container_add (GTK_CONTAINER (notebook1), scrolledwindow1);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
 
-  clist1 = gtk_clist_new (5);
+  clist1 = gtk_clist_new (6);
   gtk_widget_set_name (clist1, "clist1");
   gtk_widget_show (clist1);
   gtk_container_add (GTK_CONTAINER (scrolledwindow1), clist1);
@@ -383,6 +482,7 @@ create_window1 (void)
   gtk_clist_set_column_width (GTK_CLIST (clist1), 2, 80);
   gtk_clist_set_column_width (GTK_CLIST (clist1), 3, 80);
   gtk_clist_set_column_width (GTK_CLIST (clist1), 4, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist1), 5, 80);
   gtk_clist_column_titles_show (GTK_CLIST (clist1));
 
   label15 = gtk_label_new (_("Channel"));
@@ -414,6 +514,200 @@ create_window1 (void)
   gtk_widget_show (label19);
   gtk_clist_set_column_widget (GTK_CLIST (clist1), 4, label19);
   gtk_label_set_justify (GTK_LABEL (label19), GTK_JUSTIFY_LEFT);
+
+  label35 = gtk_label_new (_("Usage"));
+  gtk_widget_set_name (label35, "label35");
+  gtk_widget_show (label35);
+  gtk_clist_set_column_widget (GTK_CLIST (clist1), 5, label35);
+  gtk_label_set_justify (GTK_LABEL (label35), GTK_JUSTIFY_LEFT);
+
+  label34 = gtk_label_new (_("All Stations"));
+  gtk_widget_set_name (label34, "label34");
+  gtk_widget_show (label34);
+  gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook1), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook1), 0), label34);
+  gtk_label_set_justify (GTK_LABEL (label34), GTK_JUSTIFY_LEFT);
+
+  vbox7 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_set_name (vbox7, "vbox7");
+  gtk_widget_show (vbox7);
+  gtk_container_add (GTK_CONTAINER (notebook1), vbox7);
+
+  scrolledwindow2 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_set_name (scrolledwindow2, "scrolledwindow2");
+  gtk_widget_show (scrolledwindow2);
+  gtk_box_pack_start (GTK_BOX (vbox7), scrolledwindow2, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow2), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+
+  clist2 = gtk_clist_new (6);
+  gtk_widget_set_name (clist2, "clist2");
+  gtk_widget_show (clist2);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow2), clist2);
+  gtk_widget_set_size_request (clist2, 525, 100);
+  gtk_clist_set_column_width (GTK_CLIST (clist2), 0, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist2), 1, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist2), 2, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist2), 3, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist2), 4, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist2), 5, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist2));
+
+  label22 = gtk_label_new (_("Channel"));
+  gtk_widget_set_name (label22, "label22");
+  gtk_widget_show (label22);
+  gtk_clist_set_column_widget (GTK_CLIST (clist2), 0, label22);
+  gtk_label_set_justify (GTK_LABEL (label22), GTK_JUSTIFY_LEFT);
+
+  label23 = gtk_label_new (_("Artist"));
+  gtk_widget_set_name (label23, "label23");
+  gtk_widget_show (label23);
+  gtk_clist_set_column_widget (GTK_CLIST (clist2), 1, label23);
+  gtk_label_set_justify (GTK_LABEL (label23), GTK_JUSTIFY_LEFT);
+
+  label24 = gtk_label_new (_("Song"));
+  gtk_widget_set_name (label24, "label24");
+  gtk_widget_show (label24);
+  gtk_clist_set_column_widget (GTK_CLIST (clist2), 2, label24);
+  gtk_label_set_justify (GTK_LABEL (label24), GTK_JUSTIFY_LEFT);
+
+  label25 = gtk_label_new (_("Category"));
+  gtk_widget_set_name (label25, "label25");
+  gtk_widget_show (label25);
+  gtk_clist_set_column_widget (GTK_CLIST (clist2), 3, label25);
+  gtk_label_set_justify (GTK_LABEL (label25), GTK_JUSTIFY_LEFT);
+
+  label26 = gtk_label_new (_("Ch #"));
+  gtk_widget_set_name (label26, "label26");
+  gtk_widget_show (label26);
+  gtk_clist_set_column_widget (GTK_CLIST (clist2), 4, label26);
+  gtk_label_set_justify (GTK_LABEL (label26), GTK_JUSTIFY_LEFT);
+
+  label27 = gtk_label_new (_("Usage"));
+  gtk_widget_set_name (label27, "label27");
+  gtk_widget_show (label27);
+  gtk_clist_set_column_widget (GTK_CLIST (clist2), 5, label27);
+  gtk_label_set_justify (GTK_LABEL (label27), GTK_JUSTIFY_LEFT);
+
+  scrolledwindow4 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_set_name (scrolledwindow4, "scrolledwindow4");
+  gtk_widget_show (scrolledwindow4);
+  gtk_box_pack_start (GTK_BOX (vbox7), scrolledwindow4, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow4), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+
+  clist4 = gtk_clist_new (6);
+  gtk_widget_set_name (clist4, "clist4");
+  gtk_widget_show (clist4);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow4), clist4);
+  gtk_widget_set_size_request (clist4, 525, 175);
+  gtk_clist_set_column_width (GTK_CLIST (clist4), 0, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist4), 1, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist4), 2, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist4), 3, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist4), 4, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist4), 5, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist4));
+
+  label36 = gtk_label_new (_("Channel"));
+  gtk_widget_set_name (label36, "label36");
+  gtk_widget_show (label36);
+  gtk_clist_set_column_widget (GTK_CLIST (clist4), 0, label36);
+  gtk_label_set_justify (GTK_LABEL (label36), GTK_JUSTIFY_LEFT);
+
+  label37 = gtk_label_new (_("Artist"));
+  gtk_widget_set_name (label37, "label37");
+  gtk_widget_show (label37);
+  gtk_clist_set_column_widget (GTK_CLIST (clist4), 1, label37);
+  gtk_label_set_justify (GTK_LABEL (label37), GTK_JUSTIFY_LEFT);
+
+  label38 = gtk_label_new (_("Song"));
+  gtk_widget_set_name (label38, "label38");
+  gtk_widget_show (label38);
+  gtk_clist_set_column_widget (GTK_CLIST (clist4), 2, label38);
+  gtk_label_set_justify (GTK_LABEL (label38), GTK_JUSTIFY_LEFT);
+
+  label39 = gtk_label_new (_("Category"));
+  gtk_widget_set_name (label39, "label39");
+  gtk_widget_show (label39);
+  gtk_clist_set_column_widget (GTK_CLIST (clist4), 3, label39);
+  gtk_label_set_justify (GTK_LABEL (label39), GTK_JUSTIFY_LEFT);
+
+  label40 = gtk_label_new (_("Ch #"));
+  gtk_widget_set_name (label40, "label40");
+  gtk_widget_show (label40);
+  gtk_clist_set_column_widget (GTK_CLIST (clist4), 4, label40);
+  gtk_label_set_justify (GTK_LABEL (label40), GTK_JUSTIFY_LEFT);
+
+  label41 = gtk_label_new (_("Usage"));
+  gtk_widget_set_name (label41, "label41");
+  gtk_widget_show (label41);
+  gtk_clist_set_column_widget (GTK_CLIST (clist4), 5, label41);
+  gtk_label_set_justify (GTK_LABEL (label41), GTK_JUSTIFY_LEFT);
+
+  label20 = gtk_label_new (_("Favorites"));
+  gtk_widget_set_name (label20, "label20");
+  gtk_widget_show (label20);
+  gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook1), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook1), 1), label20);
+  gtk_label_set_justify (GTK_LABEL (label20), GTK_JUSTIFY_LEFT);
+
+  scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_set_name (scrolledwindow3, "scrolledwindow3");
+  gtk_widget_show (scrolledwindow3);
+  gtk_container_add (GTK_CONTAINER (notebook1), scrolledwindow3);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow3), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+
+  clist3 = gtk_clist_new (6);
+  gtk_widget_set_name (clist3, "clist3");
+  gtk_widget_show (clist3);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow3), clist3);
+  gtk_widget_set_size_request (clist3, 525, 275);
+  gtk_clist_set_column_width (GTK_CLIST (clist3), 0, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist3), 1, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist3), 2, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist3), 3, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist3), 4, 80);
+  gtk_clist_set_column_width (GTK_CLIST (clist3), 5, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist3));
+
+  label28 = gtk_label_new (_("Channel"));
+  gtk_widget_set_name (label28, "label28");
+  gtk_widget_show (label28);
+  gtk_clist_set_column_widget (GTK_CLIST (clist3), 0, label28);
+  gtk_label_set_justify (GTK_LABEL (label28), GTK_JUSTIFY_LEFT);
+
+  label29 = gtk_label_new (_("Artist"));
+  gtk_widget_set_name (label29, "label29");
+  gtk_widget_show (label29);
+  gtk_clist_set_column_widget (GTK_CLIST (clist3), 1, label29);
+  gtk_label_set_justify (GTK_LABEL (label29), GTK_JUSTIFY_LEFT);
+
+  label30 = gtk_label_new (_("Song"));
+  gtk_widget_set_name (label30, "label30");
+  gtk_widget_show (label30);
+  gtk_clist_set_column_widget (GTK_CLIST (clist3), 2, label30);
+  gtk_label_set_justify (GTK_LABEL (label30), GTK_JUSTIFY_LEFT);
+
+  label31 = gtk_label_new (_("Category"));
+  gtk_widget_set_name (label31, "label31");
+  gtk_widget_show (label31);
+  gtk_clist_set_column_widget (GTK_CLIST (clist3), 3, label31);
+  gtk_label_set_justify (GTK_LABEL (label31), GTK_JUSTIFY_LEFT);
+
+  label32 = gtk_label_new (_("Ch #"));
+  gtk_widget_set_name (label32, "label32");
+  gtk_widget_show (label32);
+  gtk_clist_set_column_widget (GTK_CLIST (clist3), 4, label32);
+  gtk_label_set_justify (GTK_LABEL (label32), GTK_JUSTIFY_LEFT);
+
+  label33 = gtk_label_new (_("Usage"));
+  gtk_widget_set_name (label33, "label33");
+  gtk_widget_show (label33);
+  gtk_clist_set_column_widget (GTK_CLIST (clist3), 5, label33);
+  gtk_label_set_justify (GTK_LABEL (label33), GTK_JUSTIFY_LEFT);
+
+  label21 = gtk_label_new (_("Session"));
+  gtk_widget_set_name (label21, "label21");
+  gtk_widget_show (label21);
+  gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook1), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook1), 2), label21);
+  gtk_label_set_justify (GTK_LABEL (label21), GTK_JUSTIFY_LEFT);
 
   g_signal_connect ((gpointer) quit1, "activate",
                     G_CALLBACK (on_quit1_activate),
@@ -475,14 +769,38 @@ create_window1 (void)
   g_signal_connect_swapped ((gpointer) host_status_image, "realize",
                             G_CALLBACK (on_host_status_image_realize),
                             GTK_OBJECT (host_status_image));
-  g_signal_connect_swapped ((gpointer) scrolledwindow1, "realize",
-                            G_CALLBACK (on_scrolledwindow1_realize),
-                            GTK_OBJECT (scrolledwindow1));
+  g_signal_connect ((gpointer) button16, "clicked",
+                    G_CALLBACK (on_button16_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button17, "clicked",
+                    G_CALLBACK (on_button17_clicked),
+                    NULL);
+  g_signal_connect_swapped ((gpointer) notebook1, "realize",
+                            G_CALLBACK (on_notebook1_realize),
+                            GTK_OBJECT (notebook1));
   g_signal_connect_swapped ((gpointer) clist1, "realize",
                             G_CALLBACK (on_clist1_realize),
                             GTK_OBJECT (clist1));
   g_signal_connect ((gpointer) clist1, "select_row",
                     G_CALLBACK (on_clist1_select_row),
+                    NULL);
+  g_signal_connect_swapped ((gpointer) clist1, "realize",
+                            G_CALLBACK (on_clist2_realize),
+                            GTK_OBJECT (clist2));
+  g_signal_connect_swapped ((gpointer) clist1, "realize",
+                            G_CALLBACK (on_clist3_realize),
+                            GTK_OBJECT (clist3));
+  g_signal_connect_swapped ((gpointer) clist1, "realize",
+                            G_CALLBACK (on_clist4_realize),
+                            GTK_OBJECT (clist4));
+  g_signal_connect ((gpointer) clist2, "select_row",
+                    G_CALLBACK (on_clist2_select_row),
+                    NULL);
+  g_signal_connect ((gpointer) clist4, "select_row",
+                    G_CALLBACK (on_clist4_select_row),
+                    NULL);
+  g_signal_connect ((gpointer) clist3, "select_row",
+                    G_CALLBACK (on_clist3_select_row),
                     NULL);
 
   /* Store pointers to all widgets, for use by lookup_widget(). */
@@ -522,6 +840,11 @@ create_window1 (void)
   GLADE_HOOKUP_OBJECT (window1, hbox2, "hbox2");
   GLADE_HOOKUP_OBJECT (window1, host_ip_entry, "host_ip_entry");
   GLADE_HOOKUP_OBJECT (window1, host_status_image, "host_status_image");
+  GLADE_HOOKUP_OBJECT (window1, button16, "button16");
+  GLADE_HOOKUP_OBJECT (window1, image24, "image24");
+  GLADE_HOOKUP_OBJECT (window1, button17, "button17");
+  GLADE_HOOKUP_OBJECT (window1, image23, "image23");
+  GLADE_HOOKUP_OBJECT (window1, notebook1, "notebook1");
   GLADE_HOOKUP_OBJECT (window1, scrolledwindow1, "scrolledwindow1");
   GLADE_HOOKUP_OBJECT (window1, clist1, "clist1");
   GLADE_HOOKUP_OBJECT (window1, label15, "label15");
@@ -529,6 +852,36 @@ create_window1 (void)
   GLADE_HOOKUP_OBJECT (window1, label17, "label17");
   GLADE_HOOKUP_OBJECT (window1, label18, "label18");
   GLADE_HOOKUP_OBJECT (window1, label19, "label19");
+  GLADE_HOOKUP_OBJECT (window1, label35, "label35");
+  GLADE_HOOKUP_OBJECT (window1, label34, "label34");
+  GLADE_HOOKUP_OBJECT (window1, vbox7, "vbox7");
+  GLADE_HOOKUP_OBJECT (window1, scrolledwindow2, "scrolledwindow2");
+  GLADE_HOOKUP_OBJECT (window1, clist2, "clist2");
+  GLADE_HOOKUP_OBJECT (window1, label22, "label22");
+  GLADE_HOOKUP_OBJECT (window1, label23, "label23");
+  GLADE_HOOKUP_OBJECT (window1, label24, "label24");
+  GLADE_HOOKUP_OBJECT (window1, label25, "label25");
+  GLADE_HOOKUP_OBJECT (window1, label26, "label26");
+  GLADE_HOOKUP_OBJECT (window1, label27, "label27");
+  GLADE_HOOKUP_OBJECT (window1, scrolledwindow4, "scrolledwindow4");
+  GLADE_HOOKUP_OBJECT (window1, clist4, "clist4");
+  GLADE_HOOKUP_OBJECT (window1, label36, "label36");
+  GLADE_HOOKUP_OBJECT (window1, label37, "label37");
+  GLADE_HOOKUP_OBJECT (window1, label38, "label38");
+  GLADE_HOOKUP_OBJECT (window1, label39, "label39");
+  GLADE_HOOKUP_OBJECT (window1, label40, "label40");
+  GLADE_HOOKUP_OBJECT (window1, label41, "label41");
+  GLADE_HOOKUP_OBJECT (window1, label20, "label20");
+  GLADE_HOOKUP_OBJECT (window1, scrolledwindow3, "scrolledwindow3");
+  GLADE_HOOKUP_OBJECT (window1, clist3, "clist3");
+  GLADE_HOOKUP_OBJECT (window1, label28, "label28");
+  GLADE_HOOKUP_OBJECT (window1, label29, "label29");
+  GLADE_HOOKUP_OBJECT (window1, label30, "label30");
+  GLADE_HOOKUP_OBJECT (window1, label31, "label31");
+  GLADE_HOOKUP_OBJECT (window1, label32, "label32");
+  GLADE_HOOKUP_OBJECT (window1, label33, "label33");
+  GLADE_HOOKUP_OBJECT (window1, label21, "label21");
+  GLADE_HOOKUP_OBJECT_NO_REF (window1, tooltips, "tooltips");
 
   gtk_window_add_accel_group (GTK_WINDOW (window1), accel_group);
 

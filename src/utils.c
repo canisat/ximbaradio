@@ -40,6 +40,9 @@
 /* Locally scoped functions */
 static int ReadFromSocket();
 static int GetRadioID();
+static int GetChannelInfo();
+static void AddClistEntry();
+static void UpdateClistEntry();
 static void UpdateChannelEntry();
 
 /* Locally scoped variables */
@@ -50,12 +53,10 @@ static int	channel_list_timer;
 static int	disconnected = 1;
 static int	last_channel = -1;
 static int	current_channel = -1;
+static char	lastbuf[512];
 
-static int	channel_ids[300];
-static char	ch_row[300];
-
-static char	row_data[5][512];
-static char *rows[5];
+static char	row_data[6][512];
+static char *rows[6];
 
 
 /*========================================================================
@@ -143,9 +144,54 @@ GetRadioID()
 	if ( XR_Radio_ID ) free(XR_Radio_ID);
 	XR_Radio_ID = (char *)malloc(strlen(ptr)+1);
 	sprintf(XR_Radio_ID, ptr);
-	DBGPrintf(("GetRadioID(): %s", cmdbuf));
+	DBGPrintf(("GetRadioID(): %s\n", XR_Radio_ID));
 }
 
+/*========================================================================
+ *	Name:		GetChannelInfo
+ *	Scope: 	Private
+ *					
+ *	Description:
+ *	Retrieves channel information.
+ *
+ *	Input Arguments:
+ *	int	ch_id			which channel to fetch, or 0 for current channel.
+ *	char	*savebuf		buffer to save return information
+ *	int	savesize		maximum size of save buffer.
+ *
+ *	Output Arguments:
+ *	Return Values:
+ *	Global Variables:
+ * int	Sock_FD			The socket used for connections to OpenXM server.
+ *
+ *	External Routines:
+ *	Method:
+ *	Restrictions:
+ *	Notes:
+ *========================================================================*/
+static int
+GetChannelInfo(
+	int	ch_id,
+	char	*savebuf,
+	int	savesize
+)
+{
+	/* Get the channel info for the specified channel */
+	char	buf[32];
+	bzero(buf, 32);
+	if ( ch_id )
+		sprintf(buf, "%s%03d\n", XR_CMD_CHA_INFO, ch_id);
+	else
+		sprintf(buf, "%sXXX\n", XR_CMD_CHA_INFO);
+	send(XR_SockFD, buf, strlen(buf), 0);
+	if (ReadFromSocket(savebuf, savesize) )
+	{
+		XRUMsg("Error retrieving channel info.\nClosing connection to server");
+		XRUDisconnect();
+		return(-1);
+	}
+	return(0);
+}
 
 /*========================================================================
  *	Name:		XRUMsg
@@ -350,14 +396,7 @@ XRURadioOn()
 
 	disconnected = 0;
 	GetRadioID();
-
-	/* Fetch the current channel information and save the channel id */
-   XRUGetChannelInfo(1);
-	last_channel = current_channel;
-
-	/* Set the timer that will update the display periodically. */
-	channel_info_timer = gtk_timeout_add (5*1000,
-      (GtkFunction)XRUGetChannelInfo, 0);
+	bzero(lastbuf, 512);
 
 	/* Set the timer that will update the channel listings periodically. */
 	channel_list_timer = gtk_timeout_add (6*1000,
@@ -389,7 +428,7 @@ XRURadioOn()
  *========================================================================*/
 int
 XRUGetChannelInfo(
-	gpointer		save_channel
+	int		save_channel
 )
 {
 	char	chr;
@@ -397,38 +436,43 @@ XRUGetChannelInfo(
 	char	*channel, *station;
 	char	*artist, *song;
 	char	*category;
-	char	buf[256];
+	char	buf[512];
 	int	i;
 	int	channel_id;
+	int	row;
+	static int firsttime = 1;
 
 	/* Don't do this if we aren't connected to the server. */
 	if ( disconnected ) return(FALSE);
 
 	/* Send the command to get the channel information, then pull the results. */
-	bzero(chinfobuf, 1024);
-	sprintf(chinfobuf, "%sXXX\n", XR_CMD_CHA_INFO);
-	send(XR_SockFD, chinfobuf, strlen(chinfobuf), 0);
-	if (ReadFromSocket(chinfobuf, 1024) )
-	{
-		XRUMsg("Error retrieving channel info.\nClosing connection to server");
-		XRUDisconnect();
-		return(TRUE);
-	}
+	if ( GetChannelInfo(0, chinfobuf, 1024) == -1 ) return(TRUE);
 
 	/* Skip the first four fields - we don't use them for now. */
 	DBGPrintf(("Channel info:\n%s", chinfobuf));
+
 	bzero((char *)(chinfobuf + strlen(chinfobuf) - 2), 1);
 	ptr = strtok(chinfobuf, "|");
 	ptr = strtok(NULL, "|");
 	ptr = strtok(NULL, "|");
 	ptr = strtok(NULL, "|");
 
-	/* Fill in the display with current channel info */
-	channel  = strtok(NULL, "~");
-	station  = strtok(NULL, "~");
-	category = strtok(NULL, "~");
-	artist   = strtok(NULL, "~");
-	song     = strtok(NULL, "~");
+	/*
+	 * Save the entry temporarily - if its complete, we'll save it in a more
+	 * permanent place in a moment.
+	 */
+	ptr += strlen(ptr) + 1;
+	strcpy(buf, ptr);
+
+	/* Grab the fields from the returned data */
+	if ( (channel  =strtok(NULL, "~")) == NULL ) return(TRUE);
+	if ( (station  =strtok(NULL, "~")) == NULL ) return(TRUE);
+	if ( (category =strtok(NULL, "~")) == NULL ) return(TRUE);
+	if ( (artist   =strtok(NULL, "~")) == NULL ) return(TRUE);
+	if ( (song     =strtok(NULL, "~")) == NULL ) return(TRUE);
+
+	/* If we get here, we got a full entry, so save it. */
+	strcpy(lastbuf, buf);
 
 	DBGPrintf((
 		"Channel: %s\n"
@@ -466,14 +510,26 @@ XRUGetChannelInfo(
 		else
 			gtk_entry_set_text(GTK_ENTRY(XR_Category_Entry), "");
 
-
-	/* Update this channels data in the channel listing window. */
-	channel_id = atoi(channel);
-	UpdateChannelEntry(channel_id, station, song, artist, category);
-
 	/* If requested, save the current channel */
 	if ( ( save_channel ) && ( channel ) )
 		current_channel = atoi(channel);
+
+	/* Update the channel listing window if this channel already exists there. */
+	row = gtk_clist_find_row_from_data(
+			GTK_CLIST(XR_Channel_Listing_Window), (gpointer)current_channel);
+	if ( row != -1 )
+		UpdateChannelEntry(row, station, song, artist, category);
+
+	/* Update the session listing window. */
+	row = gtk_clist_find_row_from_data(
+			GTK_CLIST(XR_Session_Listing_Window), (gpointer)current_channel);
+	if ( row != -1 )
+		UpdateClistEntry(XR_Session_Listing_Window,
+			row, station, song, artist, category);
+	else
+		AddClistEntry(
+			XR_Session_Listing_Window,
+			station, song, artist, category, current_channel);
 
 	/*
 	 * All functions that are called by timers need to return this to keep
@@ -510,7 +566,7 @@ XRUChannelUp()
 	if ( strncmp(cmdbuf, "1", 1)  != 0 )
 		XRUMsg("XMPCR server could not change channel.");
 	last_channel = current_channel;
-	XRUGetChannelInfo((gpointer)1);
+	XRUGetChannelInfo(1);
 }
 
 /*========================================================================
@@ -541,7 +597,7 @@ XRUChannelDown()
 	if ( strncmp(cmdbuf, "1", 1)  != 0 )
 		XRUMsg("XMPCR server could not change channel.");
 	last_channel = current_channel;
-	XRUGetChannelInfo((gpointer)1);
+	XRUGetChannelInfo(1);
 }
 
 /*========================================================================
@@ -636,7 +692,7 @@ XRUChannelLast()
 	else
 	{
 		last_channel = current_channel;
-		XRUGetChannelInfo((gpointer)1);
+		XRUGetChannelInfo(1);
 	}
 }
 
@@ -665,12 +721,12 @@ XRUChannelRefresh()
 {
 	static int		channel_id = 1;
 	char				buf[512];
-	static char		lastbuf[512];
 	char				*channel, *station;
 	char				*artist, *song;
 	char				*category;
 	char				*ptr;
-	int				i, j;
+	int				i;
+	int				row;
 	static int		running = 0;
 	static int		firsttime = 1;
 
@@ -683,26 +739,12 @@ XRUChannelRefresh()
 
 	if ( running ) return(TRUE);
 
-	if (firsttime) 
-	{
-		bzero(lastbuf, 512);
-		firsttime = 0;
-		for (i=0; i<300; i++) { channel_ids[i] = -1; ch_row[i] = -1; }
-	}
-
 	gtk_clist_freeze(GTK_CLIST(XR_Channel_Listing_Window));
 	running = 1;
-	for (i=channel_id; i<channel_id+XR_REFRESH_BLOCK; i++)
+	for (i=channel_id; i<channel_id+XR_REFRESH_BLOCK && i<=XR_MAX_CHANNELS; i++)
 	{
-		bzero(buf, 512);
-		sprintf(buf, "%s%03d\n", XR_CMD_CHA_INFO, i);
-		send(XR_SockFD, buf, strlen(buf), 0);
-		if (ReadFromSocket(buf, 512) )
-		{
-			XRUMsg("Error retrieving channel info.\nClosing connection to server");
-			XRUDisconnect();
-			return;
-		}
+		/* Get the channel info for the current channel */
+		if ( GetChannelInfo(i, buf, 512) == -1 ) return(TRUE);
 
 		/* Skip the first four fields - we don't use them for now. */
 		bzero((char *)(buf + strlen(buf) - 2), 1);
@@ -715,29 +757,29 @@ XRUChannelRefresh()
 		ptr += strlen(ptr) + 1;
 		DBGPrintf(("Channel info:\n%s\n", ptr));
 		DBGPrintf(("Lastbuf:\n%s\n", lastbuf));
-		if ( strcmp(ptr, lastbuf) == 0 ) continue;
+		if ( strlen(lastbuf) > 0 ) 
+			if ( strncmp(lastbuf, ptr, strlen(lastbuf)) == 0 ) continue;
 		strcpy(lastbuf, ptr);
 	
 		/* Fill in the display with current channel info */
-		if ( (channel  =strtok(ptr, "~"))  == NULL ) continue;
+		if ( (channel  =strtok(NULL, "~")) == NULL ) continue;
 		if ( (station  =strtok(NULL, "~")) == NULL ) continue;
 		if ( (category =strtok(NULL, "~")) == NULL ) continue;
 		if ( (artist   =strtok(NULL, "~")) == NULL ) continue;
 		if ( (song     =strtok(NULL, "~")) == NULL ) continue;
 
+		/* Find the entry if the list, if it exists. */
+		row = gtk_clist_find_row_from_data(
+			GTK_CLIST(XR_Channel_Listing_Window), (gpointer)i);
+
 		/* Is this channel already in our link list? */
-		if ( channel_ids[i-1] != -1 )
+		if ( row != -1 )
 		{
 			/* It is, so update its entry and update the display. */
-			channel_ids[i-1] = i;
-
-			UpdateChannelEntry(i, station, song, artist, category);
+			UpdateChannelEntry(row, station, song, artist, category);
 		}
 		else
 		{
-			/* It isn't, so add it and add a row to the display */
-			channel_ids[i-1] = i;
-
 			if (strncmp(station, "XM Prev", strlen("XM Prev")) != 0)
 			{
 				sprintf((char *)&row_data[0], "%d: %s", i, station);
@@ -745,6 +787,7 @@ XRUChannelRefresh()
 				sprintf((char *)&row_data[2], "%s", song);
 				sprintf((char *)&row_data[3], "%s", category);
 				sprintf((char *)&row_data[4], "%03d", i);
+				sprintf((char *)&row_data[5], " ");
 			}
 			else
 			{
@@ -753,17 +796,19 @@ XRUChannelRefresh()
 				sprintf((char *)&row_data[2], "");
 				sprintf((char *)&row_data[3], "");
 				sprintf((char *)&row_data[4], "%03d", i);
+				sprintf((char *)&row_data[5], " ");
 			}
 			rows[0] = row_data[0];
 			rows[1] = row_data[1];
 			rows[2] = row_data[2];
 			rows[3] = row_data[3];
 			rows[4] = row_data[4];
+			rows[5] = row_data[5];
 
-			ch_row[i-1] = 
+			row = 
 				gtk_clist_append(GTK_CLIST(XR_Channel_Listing_Window), rows);
 			gtk_clist_set_row_data(GTK_CLIST(XR_Channel_Listing_Window),
-				ch_row[i-1], (gpointer)i);
+				row, (gpointer)i);
 		}
 	}
 	gtk_clist_thaw(GTK_CLIST(XR_Channel_Listing_Window));
@@ -773,7 +818,19 @@ XRUChannelRefresh()
 	 * were are called.
 	 */
 	channel_id += XR_REFRESH_BLOCK;
-	if (channel_id > 300) { channel_id = 1; }
+	if (channel_id > XR_MAX_CHANNELS) { channel_id = 1; }
+
+	/* Update the Current Channel after we've updated the list. */
+	if ( firsttime )
+	{
+   	XRUGetChannelInfo(1);
+		last_channel = current_channel;
+		firsttime = 0;
+	}
+	else
+	{
+		XRUGetChannelInfo(0);
+	}
 
 	/*
 	 * This variable, if sets, prevents us from being called while we're
@@ -791,6 +848,12 @@ XRUChannelRefresh()
  * Updates an entry in the Channel Listing window.
  *
  *	Input Arguments:
+ *	int	row			index into arrays that hold channel and row numbers
+ * char	*station		name of current station
+ * char	*song			name of current song
+ * char	*artist		name of current artist
+ * char	*category	name of current category
+ *	
  *	Output Arguments:
  *	Return Values:
  *	Global Variables:
@@ -803,7 +866,7 @@ XRUChannelRefresh()
  *========================================================================*/
 static void
 UpdateChannelEntry(
-	int	i,
+	int	row,
 	char	*station,
 	char	*song,
 	char	*artist,
@@ -811,29 +874,166 @@ UpdateChannelEntry(
 )
 {
 	char	buf[512];
+	static int	running = 0;
 
-	if ( channel_ids[i] == -1 ) return;
+	if ( running ) return;
+	running = 1 ;
 
-	sprintf(buf, "%d: %s", i, station);
+	UpdateClistEntry(XR_Channel_Listing_Window,
+		row, station, song, artist, category);
+
+#if 0
+	sprintf(buf, "%d: %s", 
+		(int)gtk_clist_get_row_data(GTK_CLIST(XR_Channel_Listing_Window), row), 
+		station);
+	DBGPrintf(("UpdateChInfo(row/Ch: station): %d/%s\n", row, buf));
+
 	gtk_clist_set_text(GTK_CLIST(XR_Channel_Listing_Window), 
-		ch_row[i-1], 0, (char *)buf);
+		row, 0, (char *)buf);
 	gtk_clist_set_text(GTK_CLIST(XR_Channel_Listing_Window), 
-		ch_row[i-1], 2, (char *)song);
+		row, 2, (char *)song);
 
 	if (strncmp(station, "XM Prev", strlen("XM Prev")) != 0)
 	{
 		gtk_clist_set_text(GTK_CLIST(XR_Channel_Listing_Window), 
-			ch_row[i-1], 1, (char *)artist);
+			row, 1, (char *)artist);
 		gtk_clist_set_text(GTK_CLIST(XR_Channel_Listing_Window), 
-			ch_row[i-1], 3, (char *)category);
+			row, 3, (char *)category);
 	}
 	else
 	{
-		gtk_clist_set_text(GTK_CLIST(XR_Channel_Listing_Window), 
-			ch_row[i-1], 1, "");
-		gtk_clist_set_text(GTK_CLIST(XR_Channel_Listing_Window), 
-			ch_row[i-1], 3, "");
+		gtk_clist_set_text(GTK_CLIST(XR_Channel_Listing_Window), row, 1, "");
+		gtk_clist_set_text(GTK_CLIST(XR_Channel_Listing_Window), row, 3, "");
 	}
+#endif
+
+	running = 0;
+}
+
+/*========================================================================
+ *	Name:		AddClistEntry
+ *	Scope: 	Private
+ *					
+ *	Description:
+ * Adds a new entry to a CList.
+ *
+ *	Input Arguments:
+ * GtkWidget	*Clist		Listing window
+ * char			*station		name of current station
+ * char			*song			name of current song
+ * char			*artist		name of current artist
+ * char			*category	name of current category
+ *	
+ *	Output Arguments:
+ *	Return Values:
+ *	Global Variables:
+ * GtkWidget	*Clist		The list of channels.
+ *
+ *	External Routines:
+ *	Method:
+ *	Restrictions:
+ *	Notes:
+ *========================================================================*/
+static void
+AddClistEntry(
+	GtkWidget	*Clist,
+	char			*station,
+	char			*song,
+	char			*artist,
+	char			*category,
+	int			chnum
+)
+{
+	int			row;
+
+	if (strncmp(station, "XM Prev", strlen("XM Prev")) != 0)
+	{
+		sprintf((char *)&row_data[0], "%d: %s", chnum, station);
+		sprintf((char *)&row_data[1], "%s", artist);
+		sprintf((char *)&row_data[2], "%s", song);
+		sprintf((char *)&row_data[3], "%s", category);
+		sprintf((char *)&row_data[4], "%03d", chnum);
+		sprintf((char *)&row_data[5], " ");
+	}
+	else
+	{
+		sprintf((char *)&row_data[0], "%d: Preview", chnum);
+		sprintf((char *)&row_data[1], "XM Preview");
+		sprintf((char *)&row_data[2], "");
+		sprintf((char *)&row_data[3], "");
+		sprintf((char *)&row_data[4], "%03d", chnum);
+		sprintf((char *)&row_data[5], " ");
+	}
+	rows[0] = row_data[0];
+	rows[1] = row_data[1];
+	rows[2] = row_data[2];
+	rows[3] = row_data[3];
+	rows[4] = row_data[4];
+	rows[5] = row_data[5];
+
+	row = gtk_clist_append(GTK_CLIST(Clist), rows);
+	gtk_clist_set_row_data(GTK_CLIST(Clist), row, (gpointer)chnum);
+}
+
+/*========================================================================
+ *	Name:		UpdateClistEntry
+ *	Scope: 	Private
+ *					
+ *	Description:
+ * Updates an entry in the Clist Listing window.
+ *
+ *	Input Arguments:
+ *	int	row			index into arrays that hold Clist and row numbers
+ * char	*station		name of current station
+ * char	*song			name of current song
+ * char	*artist		name of current artist
+ * char	*category	name of current category
+ *	
+ *	Output Arguments:
+ *	Return Values:
+ *	Global Variables:
+ * GtkWidget	*Clist		The list of channels.
+ *
+ *	External Routines:
+ *	Method:
+ *	Restrictions:
+ *	Notes:
+ *========================================================================*/
+static void
+UpdateClistEntry(
+	GtkWidget	*clist,
+	int			row,
+	char			*station,
+	char			*song,
+	char			*artist,
+	char			*category
+)
+{
+	char	buf[512];
+	static int	running = 0;
+
+	if ( running ) return;
+	running = 1 ;
+
+	sprintf(buf, "%d: %s", 
+		(int)gtk_clist_get_row_data(GTK_CLIST(clist), row), station);
+	DBGPrintf(("UpdateSessionInfo(row/Ch: station): %d/%s\n", row, buf));
+
+	gtk_clist_set_text(GTK_CLIST(clist), row, 0, (char *)buf);
+	gtk_clist_set_text(GTK_CLIST(clist), row, 2, (char *)song);
+
+	if (strncmp(station, "XM Prev", strlen("XM Prev")) != 0)
+	{
+		gtk_clist_set_text(GTK_CLIST(clist), row, 1, (char *)artist);
+		gtk_clist_set_text(GTK_CLIST(clist), row, 3, (char *)category);
+	}
+	else
+	{
+		gtk_clist_set_text(GTK_CLIST(clist), row, 1, "");
+		gtk_clist_set_text(GTK_CLIST(clist), row, 3, "");
+	}
+
+	running = 0;
 }
 
 /*========================================================================
@@ -868,8 +1068,11 @@ XRUChannelListingSelected (
 	char				buf[32];
 	int				channel_id;
 
+/*
 	channel_id = 
 		(int)gtk_clist_get_row_data(GTK_CLIST(XR_Channel_Listing_Window), row);
+*/
+	channel_id = (int)gtk_clist_get_row_data(GTK_CLIST(widget), row);
 	printf("Channel selected: %d\n", channel_id);
 
 	if ( channel_id )
@@ -882,7 +1085,7 @@ XRUChannelListingSelected (
 		else
 		{
 			last_channel = current_channel;
-			XRUGetChannelInfo((gpointer)1);
+			XRUGetChannelInfo(1);
 		}
 	}
 }
@@ -956,6 +1159,7 @@ XRUJumpToStationID()
 	char	*channel;
 	int	channel_id;
 	char	buf[32];
+	int	row;
 
 	if ( XR_JumpTo_StationID )
 	{
@@ -972,7 +1176,21 @@ XRUJumpToStationID()
 		else
 		{
 			last_channel = current_channel;
-			XRUGetChannelInfo((gpointer)1);
+			XRUGetChannelInfo(1);
+			row = gtk_clist_find_row_from_data(
+				GTK_CLIST(XR_Channel_Listing_Window), (gpointer)current_channel);
+			if ( row != -1 )
+			{
+				gtk_signal_handler_block (
+					GTK_OBJECT (XR_Channel_Listing_Window), 
+						XR_Clist_Sig_ID);
+
+				gtk_clist_select_row( GTK_CLIST(XR_Channel_Listing_Window), row, 0);
+
+				gtk_signal_handler_unblock (
+					GTK_OBJECT (XR_Channel_Listing_Window), 
+						XR_Clist_Sig_ID);
+			}
 		}
 	}
 	else
@@ -1062,4 +1280,144 @@ XRUJumpKeyPress(
 
 }
 
+/*========================================================================
+ *	Name:		XRUAddFavoriteArtist
+ *	Scope: 	Public
+ *					
+ *	Description:
+ * Add the current artist to the favorites list.
+ *
+ *	Input Arguments:
+ *	Output Arguments:
+ *	Return Values:
+ *	Global Variables:
+ *	External Routines:
+ *	Method:
+ *	Restrictions:
+ *	Notes:
+ *========================================================================*/
+void 
+XRUAddFavoriteArtist()
+{
+	char	buf[1024];
+	char	*ptr;
+	char	*channel, *station;
+	char	*artist, *song;
+	char	*category;
+	int	chnum;
+	int	row;
 
+	/* Get the current channel info */
+	if ( GetChannelInfo(0, buf, 1024) == -1 ) return;
+
+	bzero((char *)(buf + strlen(buf) - 2), 1);
+	ptr = strtok(buf, "|");
+	ptr = strtok(NULL, "|");
+	ptr = strtok(NULL, "|");
+	ptr = strtok(NULL, "|");
+
+	/* Grab the fields from the returned data */
+	if ( (channel  =strtok(NULL, "~")) == NULL ) return;
+	if ( (station  =strtok(NULL, "~")) == NULL ) return;
+	if ( (category =strtok(NULL, "~")) == NULL ) return;
+	if ( (artist   =strtok(NULL, "~")) == NULL ) return;
+	if ( (song     =strtok(NULL, "~")) == NULL ) return;
+
+	/* Add it to the clist */
+	chnum = atoi(channel);
+	row = gtk_clist_find_row_from_data(
+			GTK_CLIST(XR_Favorites_Artist_Listing_Window), (gpointer)chnum);
+	if ( row == -1 )
+		AddClistEntry(
+			XR_Favorites_Artist_Listing_Window,
+			station, song, artist, category, chnum);
+}
+
+
+void 
+XRUAddFavoriteStation()
+{
+	char	buf[1024];
+	char	*ptr;
+	char	*channel, *station;
+	char	*artist, *song;
+	char	*category;
+	int	chnum;
+	int	row;
+
+	/* Get the current channel info */
+	if ( GetChannelInfo(0, buf, 1024) == -1 ) return;
+
+	bzero((char *)(buf + strlen(buf) - 2), 1);
+	ptr = strtok(buf, "|");
+	ptr = strtok(NULL, "|");
+	ptr = strtok(NULL, "|");
+	ptr = strtok(NULL, "|");
+
+	/* Grab the fields from the returned data */
+	if ( (channel  =strtok(NULL, "~")) == NULL ) return;
+	if ( (station  =strtok(NULL, "~")) == NULL ) return;
+	if ( (category =strtok(NULL, "~")) == NULL ) return;
+	if ( (artist   =strtok(NULL, "~")) == NULL ) return;
+	if ( (song     =strtok(NULL, "~")) == NULL ) return;
+
+	/* Add it to the clist */
+	chnum = atoi(channel);
+	row = gtk_clist_find_row_from_data(
+			GTK_CLIST(XR_Favorites_Listing_Window), (gpointer)chnum);
+	if ( row == -1 )
+		AddClistEntry(
+			XR_Favorites_Listing_Window,
+			station, song, artist, category, chnum);
+}
+
+/*========================================================================
+ *	Name:		XRUChannelListingSelected
+ *	Scope: 	Public
+ *					
+ *	Description:
+ * This function takes the row selected from our Channel Listing and
+ * requests the server to jump to the specified station.
+ *
+ *	Input Arguments:
+ *	Output Arguments:
+ *	Return Values:
+ *	Global Variables:
+ * int		Sock_FD			The socket used for connections to OpenXM server.
+ * char		*cmdbuf			buffer used for all outbound commands.
+ *
+ *	External Routines:
+ *	Method:
+ *	Restrictions:
+ *	Notes:
+ *========================================================================*/
+void 
+XRUFavoritesListingSelected (
+   GtkWidget      *widget,
+   gint           row,
+   gint           column,
+   GdkEventButton *event,
+   gpointer       data
+)
+{
+	char				buf[32];
+	int				channel_id;
+
+	channel_id = 
+		(int)gtk_clist_get_row_data(GTK_CLIST(XR_Favorites_Listing_Window), row);
+	printf("Channel selected: %d\n", channel_id);
+
+	if ( channel_id )
+	{
+		sprintf(buf, "%s%03d\n", XR_CMD_CHA_SET, channel_id);
+		send(XR_SockFD, buf, strlen(buf), 0);
+		ReadFromSocket(cmdbuf, 512);
+		if ( strncmp(cmdbuf, "1", 1)  != 0 )
+			XRUMsg("XMPCR server could not change to that station.");
+		else
+		{
+			last_channel = current_channel;
+			XRUGetChannelInfo(1);
+		}
+	}
+}

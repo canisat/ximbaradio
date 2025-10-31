@@ -104,16 +104,16 @@ void
 XRChannelListToggle                    (GtkButton       *button,
                                         gpointer         user_data)
 {
-	if ( XR_Channel_Listing_Scrolled_Window )
+	if ( XR_Channel_Listing_Notebook_Window )
 	{
 		if ( XR_Channel_Listing_State == 1 )
 		{
-			gtk_widget_hide( XR_Channel_Listing_Scrolled_Window );
+			gtk_widget_hide( XR_Channel_Listing_Notebook_Window );
 			XR_Channel_Listing_State = 0;
 		}
 		else
 		{
-			gtk_widget_show( XR_Channel_Listing_Scrolled_Window );
+			gtk_widget_show( XR_Channel_Listing_Notebook_Window );
 			XR_Channel_Listing_State = 1;
 		}
 	}
@@ -194,10 +194,10 @@ on_okbutton1_clicked                   (GtkButton       *button,
 
 
 void
-on_scrolledwindow1_realize             (GtkWidget       *widget,
+on_notebook1_realize                   (GtkWidget       *widget,
                                         gpointer         user_data)
 {
-	XR_Channel_Listing_Scrolled_Window = widget;
+	XR_Channel_Listing_Notebook_Window = widget;
 	XR_Channel_Listing_State = 1;
 }
 
@@ -278,6 +278,9 @@ on_clist1_realize                      (GtkWidget       *widget,
 	gtk_clist_set_auto_sort(GTK_CLIST(XR_Channel_Listing_Window), TRUE);
 	gtk_clist_set_column_visibility(GTK_CLIST(XR_Channel_Listing_Window), 
 		4, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Channel_Listing_Window), 
+		5, FALSE);
+
 	gtk_clist_set_column_width(GTK_CLIST(XR_Channel_Listing_Window), 
 		0, 115);
 	gtk_clist_set_column_width(GTK_CLIST(XR_Channel_Listing_Window), 
@@ -286,6 +289,13 @@ on_clist1_realize                      (GtkWidget       *widget,
 		2, 150);
 	gtk_clist_set_column_width(GTK_CLIST(XR_Channel_Listing_Window), 
 		3, 60);
+
+	XR_Clist_Sig_ID = 
+		g_signal_handler_find((gpointer)XR_Channel_Listing_Window,
+			G_SIGNAL_MATCH_FUNC, 
+			0, 0, NULL, 
+			on_clist1_select_row,
+			0);
 }
 
 
@@ -308,5 +318,157 @@ on_entry1_key_press_event              (GtkWidget       *widget,
 
 	XRUJumpKeyPress(event);
 	return FALSE;
+}
+
+
+void
+on_clist2_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Favorites_Listing_Window = widget;
+	gtk_clist_set_sort_column(GTK_CLIST(XR_Favorites_Listing_Window), 4);
+	gtk_clist_set_auto_sort(GTK_CLIST(XR_Favorites_Listing_Window), TRUE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Listing_Window), 
+		1, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Listing_Window), 
+		2, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Listing_Window), 
+		3, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Listing_Window), 
+		4, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Listing_Window), 
+		5, FALSE);
+
+	gtk_clist_set_column_width(GTK_CLIST(XR_Favorites_Listing_Window), 
+		0, 115);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Favorites_Listing_Window), 
+		1, 160);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Favorites_Listing_Window), 
+		2, 150);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Favorites_Listing_Window), 
+		3, 60);
+
+	XR_Favorites_Clist_Sig_ID = 
+		g_signal_handler_find((gpointer)XR_Favorites_Listing_Window,
+			G_SIGNAL_MATCH_FUNC, 
+			0, 0, NULL, 
+			on_clist2_select_row,
+			0);
+}
+
+
+void
+on_clist2_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data)
+{
+	XRUChannelListingSelected(clist, row, column, event, user_data);
+}
+
+
+void
+on_clist3_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Session_Listing_Window = widget;
+	gtk_clist_set_sort_column(GTK_CLIST(XR_Session_Listing_Window), 4);
+	gtk_clist_set_auto_sort(GTK_CLIST(XR_Session_Listing_Window), TRUE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Session_Listing_Window), 
+		4, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Session_Listing_Window), 
+		5, FALSE);
+
+	gtk_clist_set_column_width(GTK_CLIST(XR_Session_Listing_Window), 
+		0, 115);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Session_Listing_Window), 
+		1, 160);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Session_Listing_Window), 
+		2, 150);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Session_Listing_Window), 
+		3, 60);
+
+	XR_Category_Clist_Sig_ID = 
+		g_signal_handler_find((gpointer)XR_Session_Listing_Window,
+			G_SIGNAL_MATCH_FUNC, 
+			0, 0, NULL, 
+			on_clist3_select_row,
+			0);
+}
+
+
+void
+on_clist3_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data)
+{
+	XRUChannelListingSelected(clist, row, column, event, user_data);
+}
+
+
+
+
+void
+on_button16_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	XRUAddFavoriteArtist();
+}
+
+
+void
+on_button17_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	XRUAddFavoriteStation();
+}
+
+
+void
+on_clist4_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Favorites_Artist_Listing_Window = widget;
+	gtk_clist_set_sort_column(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 4);
+	gtk_clist_set_auto_sort(GTK_CLIST(XR_Favorites_Artist_Listing_Window), TRUE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		0, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		2, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		3, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		4, FALSE);
+	gtk_clist_set_column_visibility(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		5, FALSE);
+
+	gtk_clist_set_column_width(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		0, 115);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		1, 160);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		2, 150);
+	gtk_clist_set_column_width(GTK_CLIST(XR_Favorites_Artist_Listing_Window), 
+		3, 60);
+
+	XR_Favorites_Artist_Clist_Sig_ID = 
+		g_signal_handler_find((gpointer)XR_Favorites_Artist_Listing_Window,
+			G_SIGNAL_MATCH_FUNC, 
+			0, 0, NULL, 
+			on_clist4_select_row,
+			0);
+}
+
+
+void
+on_clist4_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data)
+{
 }
 

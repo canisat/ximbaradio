@@ -1,0 +1,16 @@
+Ximba Radio
+-----------
+
+Ximba Radio is a graphical user interface to the OpenXM Daemon.  Together
+they provide a user the ability to control an XMPCR USB-connected XM Radio.
+Ximba Radio provides all the same basic features that the Windows-based XMPCR 
+application provides.
+
+
+To Build
+----------
+./configure
+make
+make install
+
+Use the --prefix option to specify an installation directory.  

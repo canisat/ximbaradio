@@ -167,3 +167,56 @@ gboolean
 on_entry1_key_press_event              (GtkWidget       *widget,
                                         GdkEventKey     *event,
                                         gpointer         user_data);
+
+void
+on_clist2_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist2_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_clist3_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist3_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_notebook1_realize                   (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist2_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist3_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_button16_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_button17_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_clist4_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist4_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);

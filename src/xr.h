@@ -1,4 +1,4 @@
-#define XR_VERSION		"Version 0.2"
+#define XR_VERSION		"Version 0.3"
 
 /* All commands to the server must end in a newline */
 #define XR_CMD_POWER_ON		"xmPOW:ON0:XXX\n"
@@ -18,6 +18,9 @@
 /* How many channels to fetch at any one time during a refresh. */
 #define XR_REFRESH_BLOCK	5
 
+/* What is the maximum number of channels I can handle? */
+#define XR_MAX_CHANNELS		255
+
 /* Default Server information. */
 #define SERV_HOST_ADDR		"127.0.0.1"
 #define SERV_TCP_PORT		3877
@@ -31,7 +34,10 @@
 GtkWidget *XR_Msg_Window = NULL;
 GtkWidget *XR_Msg = NULL;
 GtkWidget *XR_Channel_Listing_Window = NULL;
-GtkWidget *XR_Channel_Listing_Scrolled_Window = NULL;
+GtkWidget *XR_Channel_Listing_Notebook_Window = NULL;
+GtkWidget *XR_Favorites_Listing_Window = NULL;
+GtkWidget *XR_Favorites_Artist_Listing_Window = NULL;
+GtkWidget *XR_Session_Listing_Window = NULL;
 GtkWidget *XR_About_Window = NULL;
 GtkWidget *XR_About_Version = NULL;
 GtkWidget *XR_Artist_Entry = NULL;
@@ -44,6 +50,10 @@ GtkWidget *XR_JumpTo_Window = NULL;
 GtkWidget *XR_JumpTo_StationID = NULL;
 GtkWidget *XR_JumpTo_StationName = NULL;
 
+int XR_Clist_Sig_ID = -1;
+int XR_Favorites_Clist_Sig_ID = -1;
+int XR_Favorites_Artist_Clist_Sig_ID = -1;
+int XR_Category_Clist_Sig_ID = -1;
 int XR_SockFD;
 int XR_Channel_Listing_State = 0;
 char *XR_Radio_ID = NULL;
@@ -55,7 +65,10 @@ int DEBUG = 0;
 extern GtkWidget *XR_Msg_Window;
 extern GtkWidget *XR_Msg;
 extern GtkWidget *XR_Channel_Listing_Window;
-extern GtkWidget *XR_Channel_Listing_Scrolled_Window;
+extern GtkWidget *XR_Channel_Listing_Notebook_Window;
+extern GtkWidget *XR_Favorites_Listing_Window;
+extern GtkWidget *XR_Favorites_Artist_Listing_Window;
+extern GtkWidget *XR_Session_Listing_Window;
 extern GtkWidget *XR_About_Window;
 extern GtkWidget *XR_About_Version;
 extern GtkWidget *XR_Artist_Entry;
@@ -68,6 +81,10 @@ extern GtkWidget *XR_JumpTo_Window;
 extern GtkWidget *XR_JumpTo_StationID;
 extern GtkWidget *XR_JumpTo_StationName;
 
+extern int XR_Clist_Sig_ID;
+extern int XR_Favorites_Clist_Sig_ID;
+extern int XR_Favorites_Artist_Clist_Sig_ID;
+extern int XR_Category_Clist_Sig_ID;
 extern int XR_SockFD;
 extern int XR_Channel_Listing_State;
 extern char *XR_Radio_ID;
@@ -94,12 +111,15 @@ void XRUChannelLast();
 int XRUGetChannelInfo();
 int XRUChannelRefresh();
 void XRUChannelListingSelected();
+void XRUFavoritesListingSelected();
 void XRUJumpToStationID();
 void XRUJumpToStationName();
 void XRUJumpToClose();
 void XRUJumpToOpen();
 void XRUShowRadioID();
 void XRUJumpKeyPress();
+void XRUAddFavoriteArtist();
+void XRUAddFavoriteStation();
 
 #else
 
@@ -117,11 +137,14 @@ extern void XRUChannelLast();
 extern int XRUGetChannelInfo();
 extern int XRUChannelRefresh();
 extern void XRUChannelListingSelected();
+extern void XRUFavoritesListingSelected();
 extern void XRUJumpToStationID();
 extern void XRUJumpToStationName();
 extern void XRUJumpToClose();
 extern void XRUJumpToOpen();
 extern void XRUShowRadioID();
 extern void XRUJumpKeyPress();
+extern void XRUAddFavoriteArtist();
+extern void XRUAddFavoriteStation();
 
 #endif

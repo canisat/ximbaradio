@@ -16,25 +16,31 @@ OpenXM Server:
    second with the real data.
    Note:  XMPCR.pm needs to return full strings too - it probably doesn't
    yet.
+7. Connect/disconnect cause daemon to start chewing up CPU.  
+8. Should Ctrl-C be required twice to kill server?
+9. Daemon should not run with debug by default.
 
 
 Ximba Radio:
 ---------------
-1. Fix online icon to change when we're online vs offline.
-2. Enable sorting for channel listing columns.
-3. Add JumpToStationName code.
+1. Add JumpToStationName code.
 
 Features to be added:
 1. Tabs for "by category" listings - add new tabs as new categories are
    encountered.  "Favorites" tab has two subnotebooks, one for stations
-	and one for artists.
-2. Favorites - Mark a current artist or channel as a favorite.
-3. New Column: Usage - keeps track of percent usage vs other stations.  How
+   and one for artists.
+2. New Column: Usage - keeps track of percent usage vs other stations.  How
    to calculate?  By time spent on a channel or by number of times that
    station is selected?
-4. Notify when a favorite artist is playing on some station other
+3. Notify when a favorite artist is playing on some station other
    than the current one, allow quick jump to that station.
-5. Start/Stop Daemon.
+4. Start/Stop Daemon (in File menu).
+5. Add Preferences:
+   a. Configure daemon host system
+   b. Read/Write a configuration file for local daemon management
+   c. Configure frequency of queries to server for performance - more
+      frequent queries (and larger channel count per querie) for fast
+      systems/networks, less frequent/smaller count for slower ones.
 
 Long term:
 1. SLIK based skin interface (or something like mplayer - maybe as a plugin?).
