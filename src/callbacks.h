@@ -260,3 +260,142 @@ on_button20_clicked                    (GtkButton       *button,
 void
 on_button21_clicked                    (GtkButton       *button,
                                         gpointer         user_data);
+
+void
+on_save1_activate                      (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_quit2_activate                      (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_entry3_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_entry4_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_checkbutton1_realize                (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_checkbutton2_realize                (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_spinbutton1_realize                 (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist5_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_entry5_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_notebook1_realize                   (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist5_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_spinbutton1_realize                 (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_checkbutton1_realize                (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_checkbutton2_realize                (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_entry5_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_entry4_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist1_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist2_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist3_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_setup_realize                       (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_clist1_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_clist2_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_clist4_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_clist3_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_clist4_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_categories_realize                  (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_ChannelState_realize                (GtkWidget       *widget,
+                                        gpointer         user_data);
+
+void
+on_button24_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_button22_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_button23_clicked                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_clist5_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);

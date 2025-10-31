@@ -21,12 +21,7 @@ Features to be added:
    to calculate?  By time spent on a channel or by number of times that
    station is selected?
 2. Start/Stop Daemon (in File menu).
-3. Add Preferences:
-   a. Configure daemon host system
-   b. Read/Write a configuration file for local daemon management
-   c. Configure frequency of queries to server for performance - more
-      frequent queries (and larger channel count per querie) for fast
-      systems/networks, less frequent/smaller count for slower ones.
+4. Minimalist interface when ximba is clicked - swaps to minimalist window.
 
 Extension:
 1. Reflector - daemon based on GStreamer to pipe audio to remote locations.

@@ -43,7 +43,11 @@ When the XMDaemon is running you can start the application:
 And that's it.  Favorites are saved in a text file - $HOME/.ximbaradiorc.
 You can edit that by hand, but using the interface is easier (and safer).
 Changes to the Favorites are saved immediately, so if the application
-crashes, you won't lose your favorites data.
+crashes, you won't lose your favorites data.  
+
+Preferences are handled through the Preferences dialog.  You can set the
+performance level which determines how channel updates affect the
+responsiveness of the application.  
 
 BUGS
 ----------

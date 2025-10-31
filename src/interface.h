@@ -8,3 +8,5 @@ GtkWidget* create_dialog1 (void);
 GtkWidget* create_dialog3 (void);
 GtkWidget* create_favorites (void);
 GtkWidget* create_deletefavorites (void);
+GtkWidget* create_preferences (void);
+GtkWidget* create_categories (void);

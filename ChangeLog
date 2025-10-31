@@ -13,3 +13,9 @@
    Fixed OpenXM XMDaemon select() handling to not chew up CPU time.
    Fixed pixmap handling to work when installed using --prefix with
       "configure"
+0.5:
+	Added Mute state icon so you can tell when the Mute is enabled.
+	Added Preferences dialog.
+
+1.0:
+	Added preferences dialog

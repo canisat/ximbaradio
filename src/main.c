@@ -11,6 +11,7 @@
 
 #include "interface.h"
 #include "support.h"
+#include "xr.h"
 
 int
 main (int argc, char *argv[])
@@ -31,15 +32,27 @@ main (int argc, char *argv[])
   add_pixmap_directory ("../pixmaps");
 */
 
+	/*
+	 * Setup preferences handling.
+	 */
+	XRUReadPrefs();
+
   /*
    * The following code was added by Glade to create one of each component
    * (except popup menus), just so that you see something after building
    * the project. Delete any components that you don't want shown initially.
    */
-  window1 = create_window1();
-  gtk_widget_show (window1);
+	window1 = create_window1();
+	gtk_widget_realize (window1);
+	if (!prefs.channel_windows)
+	{
+		gtk_widget_realize( XR_Channel_Listing_Notebook_Window );
+		gtk_widget_hide( XR_Channel_Listing_Notebook_Window );
+		XR_Channel_Listing_State = 0;
+	}
+	gtk_widget_show (window1);
 
-  gtk_main ();
-  return 0;
+	gtk_main ();
+	return 0;
 }
 

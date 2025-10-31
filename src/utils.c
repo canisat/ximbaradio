@@ -33,6 +33,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 
@@ -54,6 +56,9 @@ static void UpdateCategoryTabs();
 static int FindCategory();
 static void UpdateChannelListings();
 static void RefreshFavoriteChannel();
+static int FindPrefsCategory();
+static void AddPrefsCategory();
+static void SavePrefsCategory();
 
 /* Locally scoped variables */
 
@@ -64,6 +69,10 @@ static char	lastbuf[512];
 
 /* The timer that updates all windows */
 static int	channel_list_timer;
+
+/* Name of the current category when working with preferences */
+static char	*category_name;
+static int	category_row;
 
 /* State information. */
 static int	disconnected = 1;
@@ -81,6 +90,14 @@ static int	favorite_channel;
 static GdkColor	gdk_favorite_color;
 static GdkColor	gdk_default_color;
 
+/*
+ * The arrays that determine the performance of the channel scanning.
+ * These arrays are indexed by the prefs.performance value.
+ * The idea here is that you fetch "channel_refresh" channels every
+ * "channel_time" seconds.
+ */
+int channel_refresh[10] = {  3,  3,  3,  5,  5, 5, 5, 5, 7, 7 };
+int channel_time[10]    = { 20, 17, 15, 13, 10, 7, 5, 3, 3, 2 };
 
 /*========================================================================
  *	Name:		ReadFromSocket
@@ -435,7 +452,9 @@ XRURadioOn()
 	bzero(lastbuf, 512);
 
 	/* Set the timer that will update the channel listings periodically. */
-	channel_list_timer = gtk_timeout_add (6*1000,
+	/* channel_list_timer = gtk_timeout_add (6*1000,
+	 */
+	channel_list_timer = gtk_timeout_add (channel_time[prefs.performance]*1000,
       (GtkFunction)XRUChannelRefresh, 0);
 
 }
@@ -732,6 +751,11 @@ XRUMuteOff()
 	ReadFromSocket(cmdbuf, 512);
 	if ( strncmp(cmdbuf, "1", 1)  != 0 )
 		XRUMsg("XMPCR server could not mute radio.");
+
+	/* Set the "host connected" icon */
+	gtk_image_set_from_stock(GTK_IMAGE(XR_Status_Image), 
+		GTK_STOCK_APPLY,
+		GTK_ICON_SIZE_BUTTON);
 }
 
 /*========================================================================
@@ -759,6 +783,11 @@ XRUMuteOn()
 	ReadFromSocket(cmdbuf, 512);
 	if ( strncmp(cmdbuf, "1", 1)  != 0 )
 		XRUMsg("XMPCR server could not mute radio.");
+
+	/* Set the "Mute" icon */
+	gtk_image_set_from_stock(GTK_IMAGE(XR_Status_Image), 
+		GTK_STOCK_NO,
+		GTK_ICON_SIZE_BUTTON);
 }
 
 void
@@ -849,7 +878,9 @@ XRUChannelRefresh()
 
 	gtk_clist_freeze(GTK_CLIST(XR_Channel_Listing_Window));
 	running = 1;
-	for (i=channel_id; i<channel_id+XR_REFRESH_BLOCK && i<=XR_MAX_CHANNELS; i++)
+	for (i=channel_id; 
+		i<channel_id+channel_refresh[prefs.performance] && i<=XR_MAX_CHANNELS; 
+		i++)
 	{
 		/* Get the channel info for the current channel */
 		if ( GetChannelInfo(i, buf, 512) == -1 ) return(TRUE);
@@ -922,6 +953,7 @@ XRUChannelRefresh()
 
 		/* Update the Category Tabs */
 		UpdateCategoryTabs(i, station, song, artist, category);
+		AddPrefsCategory(category);
 	}
 	gtk_clist_thaw(GTK_CLIST(XR_Channel_Listing_Window));
 
@@ -929,7 +961,7 @@ XRUChannelRefresh()
 	 * This keeps track of what channel we should start on the next time
 	 * were are called.
 	 */
-	channel_id += XR_REFRESH_BLOCK;
+	channel_id += channel_refresh[prefs.performance];
 	if (channel_id > XR_MAX_CHANNELS) { channel_id = 1; }
 
 	/* Update the Current Channel after we've updated the list. */
@@ -1226,13 +1258,6 @@ PaintChannelListEntry(
 	GList		*found;
 	char		buf[256];
 
-	/* Don't do anything if the favorites window is already visible. */
-/*
-	if ( XR_Favorite_Channel_Window != NULL )
-		if ( GTK_WIDGET_VISIBLE(XR_Favorite_Channel_Window) ) 
-			return;
-*/
-
 	found = g_list_find_custom(XR_List_Artist, artist, (gpointer)FavoriteItem);
 	if ( found != NULL ) 
 	{
@@ -1240,6 +1265,7 @@ PaintChannelListEntry(
 		favorite_channel = (int)gtk_clist_get_row_data(GTK_CLIST(clist), row);
 
 		if (favorite_channel == current_channel) return;
+		if ( ! prefs.enable_favorites ) return;
 
 		if ( XR_Favorite_Channel_Window == NULL )
 		{
@@ -1765,7 +1791,7 @@ XRUSaveFavorites (
 
 	if ( (fd = fopen(buf, "w")) == NULL )
 	{
-		printf("Can't open reading %s\n", buf);
+		printf("Can't open for writing %s\n", buf);
 		return;
 	}
 	g_list_foreach(XR_List_Artist, (gpointer)SaveArtist, (gpointer)fd);
@@ -1865,6 +1891,10 @@ UpdateCategoryTabs(
 	int			index;
 	GtkWidget	*scrolledwindow;
 	GtkWidget	*label;
+	int			pagenum;
+	int			position;
+	CatEntryT	*catentry;
+	int			state;
 
 	int	clist_widths[6] = {115, 160, 150, 60, 80, 80};
 	char	*clist_labels[] = {
@@ -1876,6 +1906,19 @@ UpdateCategoryTabs(
 				"Usage",
 				NULL
 				};
+
+	/* First, find out if this category's display state has been set */
+	listptr = g_list_find_custom(prefs.categories, category, 
+					(gpointer)FindPrefsCategory);
+	if ( listptr != NULL )
+	{
+		position = g_list_position(prefs.categories, listptr);
+		catentry = (CatEntryT *)g_list_nth_data(prefs.categories, position);
+
+		/* Don't add this tab if its been disabled by the user */
+		if ( catentry->state == 0 )
+			return;
+	}
 
 	/* Find a matching entry, if any, for the category. */
 	listptr = g_list_find_custom(XR_List_Categories, category, 
@@ -1896,6 +1939,9 @@ UpdateCategoryTabs(
 			GTK_NOTEBOOK (XR_Channel_Listing_Notebook_Window), 
 			scrolledwindow,
 			label);
+		pagenum = gtk_notebook_page_num(
+						GTK_NOTEBOOK (XR_Channel_Listing_Notebook_Window), 
+						scrolledwindow);
 
   		clist = gtk_clist_new (6);
   		gtk_widget_show (clist);
@@ -1928,6 +1974,7 @@ UpdateCategoryTabs(
 		linkptr->name = (char *)malloc(strlen(category)+1);
 		sprintf(linkptr->name, "%s", category);
 		linkptr->clist = clist;
+		linkptr->pagenum = pagenum;
 
 		/* Add link to categories list */
 		XR_List_Categories = g_list_append(XR_List_Categories, linkptr);
@@ -1943,6 +1990,8 @@ UpdateCategoryTabs(
 	/* Get the Category structure data */
 	index = g_list_position(XR_List_Categories, listptr);
 	linkptr = (CategoryT *)g_list_nth_data(XR_List_Categories, index);
+
+	/* Find out if we need to hide this page */
 	
 	/* See if this channel is in the exist category list. */
 	row = gtk_clist_find_row_from_data(GTK_CLIST(linkptr->clist), 
@@ -1951,4 +2000,393 @@ UpdateCategoryTabs(
 		UpdateClistEntry(linkptr->clist, row, station, song, artist, category);
 	else
 		AddClistEntry( linkptr->clist, station, song, artist, category, chnum);
+}
+
+/*========================================================================
+ *	Name:		XRUSavePreferences
+ *	Scope: 	Public
+ *					
+ *	Description:
+ * Retrieve values from the Preferences dialog, update the runtime system
+ * and save to file.
+ *========================================================================*/
+void
+XRUSavePreferences()
+{
+	gboolean		channel_windows;
+	int			performance;
+
+	/* This one tells us where the XMDaemon will be running */
+	if (prefs.hostname) free(prefs.hostname);
+	prefs.hostname = 
+		gtk_editable_get_chars(GTK_EDITABLE(XR_Preference_Host), 0, -1);
+
+	/*
+	 * This one tells use where to find the XMDaemon program, in case we
+	 * want to start it locally
+	 */
+	if (prefs.daemondir) free(prefs.daemondir);
+	prefs.daemondir = 
+		gtk_editable_get_chars(GTK_EDITABLE(XR_Preference_Location),0,-1);
+
+	/*
+	 * This one sets whether or not we show the channel listing windows.
+	 */
+	prefs.channel_windows = (gboolean)
+		gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(XR_Preference_Channel_Listing));
+	if ( XR_Channel_Listing_Notebook_Window )
+	{
+		if ( prefs.channel_windows )
+		{
+			gtk_widget_show( XR_Channel_Listing_Notebook_Window );
+			XR_Channel_Listing_State = 1;
+		}
+		else
+		{
+			gtk_widget_hide( XR_Channel_Listing_Notebook_Window );
+			XR_Channel_Listing_State = 0;
+		}
+	}
+
+	/*
+	 * This one determines if we want to be notified when a favorite artist
+	 * is playing.
+	 */
+	prefs.enable_favorites = (gboolean)
+		gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(XR_Preference_Enable_Favorites));
+
+	/*
+	 * This one determines how often and how much we query for new 
+	 * station information.
+	 */
+	prefs.performance = 
+		gtk_spin_button_get_value_as_int(
+			GTK_SPIN_BUTTON(XR_Preference_Performance));
+
+	/* Reset the refresh timer. */
+	gtk_timeout_remove ( channel_list_timer );
+	channel_list_timer = gtk_timeout_add (channel_time[prefs.performance]*1000,
+      (GtkFunction)XRUChannelRefresh, 0);
+
+	/* Save to file */
+	XRUSavePrefs();
+}
+
+
+/*========================================================================
+ *	Name:		XRUSavePrefs
+ *	Scope: 	Public
+ *					
+ *	Description:
+ * Save the preferences to file.
+ *========================================================================*/
+void
+XRUSavePrefs()
+{
+	FILE			*fd;
+	static char	*home;
+	static int	firsttime = 1;
+	static char	buf[1024];
+	GList			*catlistitem;
+	int			position;
+
+	/* First time - build output file name */
+	if ( firsttime )
+	{
+		home = getenv("HOME");
+		firsttime = 0;
+		sprintf(buf, "%s/%s", home, PREFSFILE);
+	}
+
+	/* Open the output file */
+	if ( (fd = fopen(buf, "w")) == NULL )
+	{
+		printf("Can't open for writing %s\n", buf);
+		return;
+	}
+
+	/* Write the preferences to it. */
+	fprintf(fd, "hostname:%s\n", prefs.hostname);
+	if ( prefs.daemondir )
+		fprintf(fd, "daemondir:%s\n", prefs.daemondir);
+	else
+		fprintf(fd, "daemondir:\n");
+	fprintf(fd, "favorites:%d\n", (int)prefs.enable_favorites);
+	fprintf(fd, "channels:%d\n", (int)prefs.channel_windows);
+	fprintf(fd, "performance:%d\n", prefs.performance);
+
+	/* Run the list of categories and save them and their states */
+	g_list_foreach(prefs.categories, SavePrefsCategory, fd);
+
+	/* Close the output file. */
+	fclose(fd);
+}
+
+static void
+SavePrefsCategory(
+	CatEntryT	*catentry,
+	FILE			*fd
+)
+{
+	fprintf(fd, "category:%s:%d\n", catentry->name, catentry->state);
+}
+
+/*========================================================================
+ *	Name:		XRUReadPrefs
+ *	Scope: 	Public
+ *					
+ *	Description:
+ * Read the preferences to file.  Only call this once, at init time.
+ *========================================================================*/
+void
+XRUReadPrefs()
+{
+	FILE			*fd;
+	struct stat	stat_buf;
+	char			buf[1024];
+	char			*name;
+	char			*value;
+	char			*state;
+	CatEntryT	*catentry;
+	static char	*home;
+	static char	filename[1024];
+
+	/* Init filename */
+	home = getenv("HOME");
+	sprintf(filename, "%s/%s", home, PREFSFILE);
+	bzero(buf, 1024);
+
+	/* Init preferences to null or empty values. */
+	prefs.hostname = (char *)malloc(strlen(SERV_HOST_ADDR)+1);
+	strcpy(prefs.hostname, SERV_HOST_ADDR);
+	prefs.daemondir = NULL;
+	prefs.enable_favorites = 1;
+	prefs.channel_windows = 0;
+	prefs.performance = 5;
+	prefs.categories = NULL;
+
+	/* Don't do anything if the file isn't there! */
+	if ( stat(filename, &stat_buf) != 0 ) return;
+
+	/* Open the input file */
+	if ( (fd = fopen(filename, "r")) == NULL )
+	{
+		printf("Can't open for reading %s\n", filename);
+		return;
+	}
+
+	/* Write the preferences to it. */
+	while(fgets(buf, 1023, fd) != NULL)
+	{
+		/* Remove newline. */
+		bzero((char *)(buf+strlen(buf)-1), 1);
+
+		/* Grab the name/value pair for the current line */
+		name = strtok(buf, ":");
+		value = strtok(NULL, ":");
+
+		/* Update preferences structure based on name */
+		if ( strcasecmp(name, "hostname") == 0 )
+		{
+			if (prefs.hostname) free(prefs.hostname);
+			prefs.hostname = (char *)malloc(strlen(value)+1);
+			strcpy(prefs.hostname, value);
+		}
+		if ( strcasecmp(name, "daemondir") == 0 )
+		{
+			if (prefs.daemondir) free(prefs.daemondir);
+			if ( value )
+			{
+				prefs.daemondir = (char *)malloc(strlen(value)+1);
+				strcpy(prefs.daemondir, value);
+			}
+			else
+				prefs.daemondir = NULL;
+		}
+		if ( strcasecmp(name, "favorites") == 0 )
+			prefs.enable_favorites = atoi(value);
+		if ( strcasecmp(name, "channels") == 0 )
+			prefs.channel_windows = atoi(value);
+		if ( strcasecmp(name, "performance") == 0 )
+			prefs.performance = atoi(value);
+
+		if ( strcasecmp(name, "category") == 0 )
+		{
+			/* Categories have three fields. */
+			state = strtok(NULL, ":");
+
+			/* Save new entry to categories GList with value and state */
+			catentry = (CatEntryT *)malloc(sizeof(CatEntryT));
+			catentry->name = (char *)malloc(strlen(value)+1);
+			strcpy(catentry->name, value);
+			catentry->state = atoi(state);
+			prefs.categories = 
+				g_list_append(prefs.categories, (gpointer)catentry);
+		}
+	}
+
+	/* Close the output file. */
+	fclose(fd);
+}
+
+/*========================================================================
+ *	Name:		FindPrefsCategory, AddPrefsCategory
+ *	Scope: 	Private
+ *					
+ *	Description:
+ * AddPrefsCategory will add an entry to the list of categories in the
+ * Preferences dialog where the user can determine if that category should be
+ * displayed or not.
+ * FindPrefsCategory is a utility function that searchs a GList for an
+ * existing category name.  It is called only by AddPrefsCategory via glib.
+ *========================================================================*/
+static int
+FindPrefsCategory(
+	CatEntryT	*category_data,
+	char			*src_category
+)
+{
+	if ( strcmp(category_data->name, src_category) == 0 )
+		return(0);
+	return(1);
+}
+static void
+AddPrefsCategory(
+	char	*category
+)
+{
+	GList			*listptr;
+	GList			*catlistitem;
+	CatEntryT	*catentry;
+	char			row_data[2][512];
+	char 			*rows[2];
+	int			row, position;
+
+	listptr = g_list_find_custom(prefs.categories, category, 
+					(gpointer)FindPrefsCategory);
+	if ( listptr == NULL )
+	{
+		printf("Adding %s to prefs categories\n", category);
+
+		/* Save new entry to categories GList with value and state */
+		catentry = (CatEntryT *)malloc(sizeof(CatEntryT));
+		catentry->name = (char *)malloc(strlen(category)+1);
+		strcpy(catentry->name, category);
+		catentry->state = 1;
+		prefs.categories = g_list_append(prefs.categories, (gpointer)catentry);
+		catlistitem = g_list_find(prefs.categories, (gpointer)catentry);
+		position = g_list_position(prefs.categories, catlistitem);
+
+		/* Update the category list in the preferences dialog */
+		if ( XR_Preference_Clist != NULL )
+		{
+			sprintf((char *)&row_data[0], "%s", catentry->name);
+			sprintf((char *)&row_data[1], "Yes");
+			rows[0] = row_data[0];
+			rows[1] = row_data[1];
+			row = gtk_clist_append(GTK_CLIST(XR_Preference_Clist), rows);
+			gtk_clist_set_row_data(GTK_CLIST(XR_Preference_Clist), row,
+				(gpointer)position);
+		}
+	}
+}
+
+/*========================================================================
+ *	Name:		XRUShowCategoryState
+ *	Scope: 	Public
+ *					
+ *	Description:
+ * Pops up the category state selection window that allows the user to 
+ * decide if the specified category should have its tab displayed or not.
+ *========================================================================*/
+void
+XRUShowCategoryState(
+	int	row
+)
+{
+	static int	firsttime = 1;
+
+	if ( firsttime ) 
+	{
+		category_name = (char *)malloc(256);
+		firsttime = 0;
+	}
+	if ( XR_Category_Window == NULL )
+	{
+		XR_Category_Window = create_categories();
+		gtk_widget_show(XR_Category_Window);
+	}
+	gtk_clist_get_text(GTK_CLIST(XR_Preference_Clist), row, 0, &category_name);
+	gtk_label_set_text(GTK_LABEL(XR_Category_State_Label), category_name);
+	gtk_widget_show(XR_Category_Window);
+	category_row = row;
+}
+
+/*========================================================================
+ *	Name:		XRUHideCategory
+ *	Scope: 	Public
+ *					
+ *	Description:
+ * Removes the Category tab if it exists and sets its state to off.
+ *========================================================================*/
+void
+XRUHideCategory(
+	int	row
+)
+{
+	CategoryT	*linkptr;
+	GList			*listptr;
+	int			position;
+	CatEntryT	*catentry;
+
+	/* Find this entry in our preferences list and mark it as "off" */
+	listptr = g_list_find_custom(prefs.categories, category_name, 
+					(gpointer)FindPrefsCategory);
+	position = g_list_position(prefs.categories, listptr);
+	catentry = (CatEntryT *)g_list_nth_data(prefs.categories, position);
+	catentry->state = 0;
+	gtk_clist_set_text(GTK_CLIST(XR_Preference_Clist), category_row, 1, "No");
+
+	/* If a page tab exists for this entry, delete it. */
+	listptr = g_list_find_custom(XR_List_Categories, category_name, 
+					(gpointer)FindCategory);
+	if ( listptr != NULL )
+	{
+		position = g_list_position(XR_List_Categories, listptr);
+		linkptr = (CategoryT *)g_list_nth_data(XR_List_Categories, position);
+		gtk_notebook_remove_page(
+			GTK_NOTEBOOK (XR_Channel_Listing_Notebook_Window), 
+			linkptr->pagenum);
+		free(linkptr->name);
+		free(linkptr);
+		XR_List_Categories = g_list_delete_link(XR_List_Categories, listptr);
+	}
+}
+
+/*========================================================================
+ *	Name:		XRUShowCategory
+ *	Scope: 	Public
+ *					
+ *	Description:
+ * Allow the Category tab to be displayed from now on.
+ *========================================================================*/
+void
+XRUShowCategory(
+	int	row
+)
+{
+	CategoryT	*linkptr;
+	GList			*listptr;
+	int			position;
+	CatEntryT	*catentry;
+
+	/* Find this entry in our preferences list and mark it as "off" */
+	listptr = g_list_find_custom(prefs.categories, category_name, 
+					(gpointer)FindPrefsCategory);
+	position = g_list_position(prefs.categories, listptr);
+	catentry = (CatEntryT *)g_list_nth_data(prefs.categories, position);
+	catentry->state = 1;
+	gtk_clist_set_text(GTK_CLIST(XR_Preference_Clist), category_row, 1, "Yes");
 }

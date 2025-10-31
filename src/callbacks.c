@@ -11,6 +11,7 @@
 #include "support.h"
 #include "xr.h"
 
+static void AddToPrefsCategory();
 
 void
 on_quit1_activate                      (GtkMenuItem     *menuitem,
@@ -125,6 +126,69 @@ XRPreferences                          (GtkButton       *button,
                                         gpointer         user_data)
 {
 
+	/* If it hasn't been opened before, create the dialog. */
+	if ( XR_Preferences_Window == NULL )
+	{
+		XR_Preferences_Window = create_preferences();
+		gtk_widget_realize(XR_Preferences_Window);
+	}
+
+	/* Update the dialog. */
+	if ( prefs.hostname )
+		gtk_entry_set_text(GTK_ENTRY(XR_Preference_Host), prefs.hostname);
+	if ( prefs.daemondir )
+		gtk_entry_set_text(GTK_ENTRY(XR_Preference_Location), prefs.daemondir);
+	if (prefs.channel_windows)
+	{
+		gtk_toggle_button_set_active(
+			GTK_TOGGLE_BUTTON(XR_Preference_Channel_Listing), TRUE);
+		gtk_widget_show( XR_Channel_Listing_Notebook_Window );
+		XR_Channel_Listing_State = 1;
+	}
+	else
+	{
+		gtk_toggle_button_set_active(
+			GTK_TOGGLE_BUTTON(XR_Preference_Channel_Listing), FALSE);
+		gtk_widget_hide( XR_Channel_Listing_Notebook_Window );
+		XR_Channel_Listing_State = 0;
+	}
+	gtk_toggle_button_set_active(
+		GTK_TOGGLE_BUTTON(XR_Preference_Enable_Favorites),
+			prefs.enable_favorites);
+	gtk_spin_button_set_value(
+		GTK_SPIN_BUTTON(XR_Preference_Performance),
+			(gdouble)prefs.performance);
+
+	if ( prefs.categories )
+	{
+		gtk_clist_clear(GTK_CLIST(XR_Preference_Clist));
+		g_list_foreach(prefs.categories, AddToPrefsCategory, NULL);
+	}
+
+	/* Now display it. */
+	gtk_widget_show(XR_Preferences_Window);
+}
+static void
+AddToPrefsCategory(
+	CatEntryT	*catentry,
+	gpointer		data
+)
+{
+	GList			*catlistitem;
+	char			row_data[2][512];
+	char 			*rows[2];
+	int			position, row;
+
+	sprintf((char *)&row_data[0], "%s", catentry->name);
+	if ( catentry->state ) sprintf((char *)&row_data[1], "Yes");
+	else                   sprintf((char *)&row_data[1], "No");
+	rows[0] = row_data[0];
+	rows[1] = row_data[1];
+	row = gtk_clist_append(GTK_CLIST(XR_Preference_Clist), rows);
+	catlistitem = g_list_find(prefs.categories, catentry);
+	position = g_list_position(prefs.categories, catlistitem);
+	gtk_clist_set_row_data(GTK_CLIST(XR_Preference_Clist), row,
+			(gpointer)position);
 }
 
 
@@ -576,5 +640,121 @@ on_button21_clicked                    (GtkButton       *button,
 {
 	if ( XR_Delete_Favorite_Popup != NULL )
 		gtk_widget_hide(XR_Delete_Favorite_Popup);
+}
+
+
+void
+on_save1_activate                      (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+	if ( XR_Preferences_Window != NULL )
+	{
+		XRUSavePreferences();
+		gtk_widget_hide(XR_Preferences_Window);
+	}
+}
+
+
+void
+on_quit2_activate                      (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+	if ( XR_Preferences_Window != NULL )
+		if ( GTK_WIDGET_VISIBLE(XR_Preferences_Window) ) 
+			gtk_widget_hide(XR_Preferences_Window);
+}
+
+
+void
+on_entry5_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Preference_Host = widget;
+}
+
+
+void
+on_entry4_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Preference_Location = widget;
+}
+
+
+void
+on_checkbutton1_realize                (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Preference_Channel_Listing = widget;
+}
+
+
+void
+on_checkbutton2_realize                (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Preference_Enable_Favorites = widget;
+}
+
+
+void
+on_spinbutton1_realize                 (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Preference_Performance = widget;
+}
+
+
+void
+on_clist5_realize                      (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Preference_Clist = widget;
+}
+
+
+
+void
+on_ChannelState_realize                (GtkWidget       *widget,
+                                        gpointer         user_data)
+{
+	XR_Category_State_Label = widget;
+}
+
+
+void
+on_button24_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	XRUShowCategory();
+	gtk_widget_hide(XR_Category_Window);
+}
+
+
+void
+on_button22_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	XRUHideCategory();
+	gtk_widget_hide(XR_Category_Window);
+}
+
+
+void
+on_button23_clicked                    (GtkButton       *button,
+                                        gpointer         user_data)
+{
+	gtk_widget_hide(XR_Category_Window);
+}
+
+
+void
+on_clist5_select_row                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data)
+{
+	XRUShowCategoryState(row);
 }
 

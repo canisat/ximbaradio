@@ -709,6 +709,24 @@ create_window1 (void)
   gtk_notebook_set_tab_label (GTK_NOTEBOOK (notebook1), gtk_notebook_get_nth_page (GTK_NOTEBOOK (notebook1), 2), label21);
   gtk_label_set_justify (GTK_LABEL (label21), GTK_JUSTIFY_LEFT);
 
+  g_signal_connect_swapped ((gpointer) window1, "realize",
+                            G_CALLBACK (on_notebook1_realize),
+                            GTK_OBJECT (notebook1));
+  g_signal_connect_swapped ((gpointer) window1, "realize",
+                            G_CALLBACK (on_clist1_realize),
+                            GTK_OBJECT (clist1));
+  g_signal_connect_swapped ((gpointer) window1, "realize",
+                            G_CALLBACK (on_clist2_realize),
+                            GTK_OBJECT (clist2));
+  g_signal_connect_swapped ((gpointer) window1, "realize",
+                            G_CALLBACK (on_clist3_realize),
+                            GTK_OBJECT (clist3));
+  g_signal_connect_swapped ((gpointer) window1, "realize",
+                            G_CALLBACK (on_clist4_realize),
+                            GTK_OBJECT (clist4));
+  g_signal_connect ((gpointer) window1, "realize",
+                    G_CALLBACK (on_setup_realize),
+                    NULL);
   g_signal_connect ((gpointer) quit1, "activate",
                     G_CALLBACK (on_quit1_activate),
                     NULL);
@@ -775,26 +793,8 @@ create_window1 (void)
   g_signal_connect_swapped ((gpointer) host_ip_entry, "realize",
                             G_CALLBACK (on_host_ip_entry_realize),
                             GTK_OBJECT (host_ip_entry));
-  g_signal_connect_swapped ((gpointer) notebook1, "realize",
-                            G_CALLBACK (on_notebook1_realize),
-                            GTK_OBJECT (notebook1));
-  g_signal_connect_swapped ((gpointer) clist1, "realize",
-                            G_CALLBACK (on_clist1_realize),
-                            GTK_OBJECT (clist1));
   g_signal_connect ((gpointer) clist1, "select_row",
                     G_CALLBACK (on_clist1_select_row),
-                    NULL);
-  g_signal_connect_swapped ((gpointer) clist1, "realize",
-                            G_CALLBACK (on_clist2_realize),
-                            GTK_OBJECT (clist2));
-  g_signal_connect_swapped ((gpointer) clist1, "realize",
-                            G_CALLBACK (on_clist3_realize),
-                            GTK_OBJECT (clist3));
-  g_signal_connect_swapped ((gpointer) clist1, "realize",
-                            G_CALLBACK (on_clist4_realize),
-                            GTK_OBJECT (clist4));
-  g_signal_connect ((gpointer) clist1, "realize",
-                    G_CALLBACK (on_setup_realize),
                     NULL);
   g_signal_connect ((gpointer) clist2, "select_row",
                     G_CALLBACK (on_clist2_select_row),
@@ -1343,5 +1343,348 @@ create_deletefavorites (void)
   GLADE_HOOKUP_OBJECT_NO_REF (deletefavorites, tooltips, "tooltips");
 
   return deletefavorites;
+}
+
+GtkWidget*
+create_preferences (void)
+{
+  GtkWidget *preferences;
+  GtkWidget *vbox8;
+  GtkWidget *menubar2;
+  GtkWidget *menuitem5;
+  GtkWidget *menuitem5_menu;
+  GtkWidget *save1;
+  GtkWidget *quit2;
+  GtkWidget *image34;
+  GtkWidget *table3;
+  GtkWidget *label44;
+  GtkWidget *label45;
+  GtkWidget *entry5;
+  GtkWidget *entry4;
+  GtkWidget *hseparator1;
+  GtkWidget *checkbutton1;
+  GtkWidget *checkbutton2;
+  GtkWidget *hbox5;
+  GtkWidget *label46;
+  GtkObject *spinbutton1_adj;
+  GtkWidget *spinbutton1;
+  GtkWidget *scrolledwindow5;
+  GtkWidget *clist5;
+  GtkWidget *label49;
+  GtkWidget *label50;
+  GtkAccelGroup *accel_group;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  accel_group = gtk_accel_group_new ();
+
+  preferences = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_widget_set_name (preferences, "preferences");
+  gtk_window_set_title (GTK_WINDOW (preferences), _("Ximba Radio Preferences"));
+
+  vbox8 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_set_name (vbox8, "vbox8");
+  gtk_widget_show (vbox8);
+  gtk_container_add (GTK_CONTAINER (preferences), vbox8);
+
+  menubar2 = gtk_menu_bar_new ();
+  gtk_widget_set_name (menubar2, "menubar2");
+  gtk_widget_show (menubar2);
+  gtk_box_pack_start (GTK_BOX (vbox8), menubar2, FALSE, FALSE, 0);
+
+  menuitem5 = gtk_menu_item_new_with_mnemonic (_("_File"));
+  gtk_widget_set_name (menuitem5, "menuitem5");
+  gtk_widget_show (menuitem5);
+  gtk_container_add (GTK_CONTAINER (menubar2), menuitem5);
+
+  menuitem5_menu = gtk_menu_new ();
+  gtk_widget_set_name (menuitem5_menu, "menuitem5_menu");
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem5), menuitem5_menu);
+
+  save1 = gtk_image_menu_item_new_from_stock ("gtk-save", accel_group);
+  gtk_widget_set_name (save1, "save1");
+  gtk_widget_show (save1);
+  gtk_container_add (GTK_CONTAINER (menuitem5_menu), save1);
+
+  quit2 = gtk_image_menu_item_new_from_stock ("gtk-close", accel_group);
+  gtk_widget_set_name (quit2, "quit2");
+  gtk_widget_show (quit2);
+  gtk_container_add (GTK_CONTAINER (menuitem5_menu), quit2);
+
+  image34 = create_pixmap (preferences, "banner-horiz-lion-about.xpm");
+  gtk_widget_set_name (image34, "image34");
+  gtk_widget_show (image34);
+  gtk_box_pack_start (GTK_BOX (vbox8), image34, FALSE, FALSE, 0);
+
+  table3 = gtk_table_new (5, 2, FALSE);
+  gtk_widget_set_name (table3, "table3");
+  gtk_widget_show (table3);
+  gtk_box_pack_start (GTK_BOX (vbox8), table3, FALSE, FALSE, 2);
+  gtk_table_set_col_spacings (GTK_TABLE (table3), 3);
+
+  label44 = gtk_label_new (_("OpenXM Daemon Host"));
+  gtk_widget_set_name (label44, "label44");
+  gtk_widget_show (label44);
+  gtk_table_attach (GTK_TABLE (table3), label44, 0, 1, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (label44), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_padding (GTK_MISC (label44), 4, 0);
+
+  label45 = gtk_label_new (_("Location of XMDaemon"));
+  gtk_widget_set_name (label45, "label45");
+  gtk_widget_show (label45);
+  gtk_table_attach (GTK_TABLE (table3), label45, 0, 1, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (label45), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_padding (GTK_MISC (label45), 4, 0);
+
+  entry5 = gtk_entry_new ();
+  gtk_widget_set_name (entry5, "entry5");
+  gtk_widget_show (entry5);
+  gtk_table_attach (GTK_TABLE (table3), entry5, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, entry5, _("Specify a hostname or IP address where your XMDaemon will be running."), NULL);
+
+  entry4 = gtk_entry_new ();
+  gtk_widget_set_name (entry4, "entry4");
+  gtk_widget_show (entry4);
+  gtk_table_attach (GTK_TABLE (table3), entry4, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, entry4, _("Specify the directory where the OpenXM package is installed."), NULL);
+
+  hseparator1 = gtk_hseparator_new ();
+  gtk_widget_set_name (hseparator1, "hseparator1");
+  gtk_widget_show (hseparator1);
+  gtk_table_attach (GTK_TABLE (table3), hseparator1, 0, 2, 2, 3,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (GTK_FILL), 0, 2);
+
+  checkbutton1 = gtk_check_button_new_with_mnemonic (_("Show Channel Listings"));
+  gtk_widget_set_name (checkbutton1, "checkbutton1");
+  gtk_widget_show (checkbutton1);
+  gtk_table_attach (GTK_TABLE (table3), checkbutton1, 1, 2, 3, 4,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton1, _("Set this to have the Channel Listing window be displayed at startup."), NULL);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton1), TRUE);
+
+  checkbutton2 = gtk_check_button_new_with_mnemonic (_("Enable Favorites Notification"));
+  gtk_widget_set_name (checkbutton2, "checkbutton2");
+  gtk_widget_show (checkbutton2);
+  gtk_table_attach (GTK_TABLE (table3), checkbutton2, 0, 1, 3, 4,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton2, _("Set this to be notified when a favorite artist is found on any station."), NULL);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton2), TRUE);
+
+  hbox5 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_set_name (hbox5, "hbox5");
+  gtk_widget_show (hbox5);
+  gtk_table_attach (GTK_TABLE (table3), hbox5, 0, 2, 4, 5,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+
+  label46 = gtk_label_new (_("Performance  Adjustment"));
+  gtk_widget_set_name (label46, "label46");
+  gtk_widget_show (label46);
+  gtk_box_pack_start (GTK_BOX (hbox5), label46, TRUE, TRUE, 0);
+  gtk_label_set_justify (GTK_LABEL (label46), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_padding (GTK_MISC (label46), 14, 0);
+
+  spinbutton1_adj = gtk_adjustment_new (0, 0, 10, 1, 1, 10);
+  spinbutton1 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton1_adj), 1, 0);
+  gtk_widget_set_name (spinbutton1, "spinbutton1");
+  gtk_widget_show (spinbutton1);
+  gtk_box_pack_start (GTK_BOX (hbox5), spinbutton1, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, spinbutton1, _("Use higher values for fast systems, lower values for slower systems."), NULL);
+
+  scrolledwindow5 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_set_name (scrolledwindow5, "scrolledwindow5");
+  gtk_widget_show (scrolledwindow5);
+  gtk_box_pack_start (GTK_BOX (vbox8), scrolledwindow5, TRUE, TRUE, 0);
+
+  clist5 = gtk_clist_new (2);
+  gtk_widget_set_name (clist5, "clist5");
+  gtk_widget_show (clist5);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow5), clist5);
+  gtk_tooltips_set_tip (tooltips, clist5, _("Use this window to hide category tabs that your are not interested in seeing."), NULL);
+  gtk_clist_set_column_width (GTK_CLIST (clist5), 0, 199);
+  gtk_clist_set_column_width (GTK_CLIST (clist5), 1, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist5));
+
+  label49 = gtk_label_new (_("Category"));
+  gtk_widget_set_name (label49, "label49");
+  gtk_widget_show (label49);
+  gtk_clist_set_column_widget (GTK_CLIST (clist5), 0, label49);
+  gtk_label_set_justify (GTK_LABEL (label49), GTK_JUSTIFY_LEFT);
+
+  label50 = gtk_label_new (_("Visible"));
+  gtk_widget_set_name (label50, "label50");
+  gtk_widget_show (label50);
+  gtk_clist_set_column_widget (GTK_CLIST (clist5), 1, label50);
+  gtk_label_set_justify (GTK_LABEL (label50), GTK_JUSTIFY_LEFT);
+
+  g_signal_connect_swapped ((gpointer) preferences, "realize",
+                            G_CALLBACK (on_clist5_realize),
+                            GTK_OBJECT (clist5));
+  g_signal_connect_swapped ((gpointer) preferences, "realize",
+                            G_CALLBACK (on_spinbutton1_realize),
+                            GTK_OBJECT (spinbutton1));
+  g_signal_connect_swapped ((gpointer) preferences, "realize",
+                            G_CALLBACK (on_checkbutton1_realize),
+                            GTK_OBJECT (checkbutton1));
+  g_signal_connect_swapped ((gpointer) preferences, "realize",
+                            G_CALLBACK (on_checkbutton2_realize),
+                            GTK_OBJECT (checkbutton2));
+  g_signal_connect_swapped ((gpointer) preferences, "realize",
+                            G_CALLBACK (on_entry5_realize),
+                            GTK_OBJECT (entry5));
+  g_signal_connect_swapped ((gpointer) preferences, "realize",
+                            G_CALLBACK (on_entry4_realize),
+                            GTK_OBJECT (entry4));
+  g_signal_connect ((gpointer) save1, "activate",
+                    G_CALLBACK (on_save1_activate),
+                    NULL);
+  g_signal_connect ((gpointer) quit2, "activate",
+                    G_CALLBACK (on_quit2_activate),
+                    NULL);
+  g_signal_connect ((gpointer) clist5, "select_row",
+                    G_CALLBACK (on_clist5_select_row),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (preferences, preferences, "preferences");
+  GLADE_HOOKUP_OBJECT (preferences, vbox8, "vbox8");
+  GLADE_HOOKUP_OBJECT (preferences, menubar2, "menubar2");
+  GLADE_HOOKUP_OBJECT (preferences, menuitem5, "menuitem5");
+  GLADE_HOOKUP_OBJECT (preferences, menuitem5_menu, "menuitem5_menu");
+  GLADE_HOOKUP_OBJECT (preferences, save1, "save1");
+  GLADE_HOOKUP_OBJECT (preferences, quit2, "quit2");
+  GLADE_HOOKUP_OBJECT (preferences, image34, "image34");
+  GLADE_HOOKUP_OBJECT (preferences, table3, "table3");
+  GLADE_HOOKUP_OBJECT (preferences, label44, "label44");
+  GLADE_HOOKUP_OBJECT (preferences, label45, "label45");
+  GLADE_HOOKUP_OBJECT (preferences, entry5, "entry5");
+  GLADE_HOOKUP_OBJECT (preferences, entry4, "entry4");
+  GLADE_HOOKUP_OBJECT (preferences, hseparator1, "hseparator1");
+  GLADE_HOOKUP_OBJECT (preferences, checkbutton1, "checkbutton1");
+  GLADE_HOOKUP_OBJECT (preferences, checkbutton2, "checkbutton2");
+  GLADE_HOOKUP_OBJECT (preferences, hbox5, "hbox5");
+  GLADE_HOOKUP_OBJECT (preferences, label46, "label46");
+  GLADE_HOOKUP_OBJECT (preferences, spinbutton1, "spinbutton1");
+  GLADE_HOOKUP_OBJECT (preferences, scrolledwindow5, "scrolledwindow5");
+  GLADE_HOOKUP_OBJECT (preferences, clist5, "clist5");
+  GLADE_HOOKUP_OBJECT (preferences, label49, "label49");
+  GLADE_HOOKUP_OBJECT (preferences, label50, "label50");
+  GLADE_HOOKUP_OBJECT_NO_REF (preferences, tooltips, "tooltips");
+
+  gtk_window_add_accel_group (GTK_WINDOW (preferences), accel_group);
+
+  return preferences;
+}
+
+GtkWidget*
+create_categories (void)
+{
+  GtkWidget *categories;
+  GtkWidget *hbox6;
+  GtkWidget *ChannelState;
+  GtkWidget *button24;
+  GtkWidget *image37;
+  GtkWidget *button22;
+  GtkWidget *image35;
+  GtkWidget *button23;
+  GtkWidget *image36;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  categories = gtk_window_new (GTK_WINDOW_POPUP);
+  gtk_widget_set_name (categories, "categories");
+  gtk_window_set_title (GTK_WINDOW (categories), _("Category Visible?"));
+  gtk_window_set_position (GTK_WINDOW (categories), GTK_WIN_POS_MOUSE);
+  gtk_window_set_modal (GTK_WINDOW (categories), TRUE);
+
+  hbox6 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_set_name (hbox6, "hbox6");
+  gtk_widget_show (hbox6);
+  gtk_container_add (GTK_CONTAINER (categories), hbox6);
+
+  ChannelState = gtk_label_new (_("Channel State"));
+  gtk_widget_set_name (ChannelState, "ChannelState");
+  gtk_widget_show (ChannelState);
+  gtk_box_pack_start (GTK_BOX (hbox6), ChannelState, TRUE, TRUE, 0);
+  gtk_misc_set_padding (GTK_MISC (ChannelState), 5, 5);
+
+  button24 = gtk_button_new ();
+  gtk_widget_set_name (button24, "button24");
+  gtk_widget_show (button24);
+  gtk_box_pack_start (GTK_BOX (hbox6), button24, FALSE, FALSE, 0);
+  GTK_WIDGET_SET_FLAGS (button24, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button24, _("Show Channel Tab"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button24), GTK_RELIEF_NONE);
+
+  image37 = gtk_image_new_from_stock ("gtk-yes", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_name (image37, "image37");
+  gtk_widget_show (image37);
+  gtk_container_add (GTK_CONTAINER (button24), image37);
+
+  button22 = gtk_button_new ();
+  gtk_widget_set_name (button22, "button22");
+  gtk_widget_show (button22);
+  gtk_box_pack_start (GTK_BOX (hbox6), button22, FALSE, FALSE, 0);
+  GTK_WIDGET_SET_FLAGS (button22, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button22, _("Hide Channel Tab"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button22), GTK_RELIEF_NONE);
+
+  image35 = gtk_image_new_from_stock ("gtk-no", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_name (image35, "image35");
+  gtk_widget_show (image35);
+  gtk_container_add (GTK_CONTAINER (button22), image35);
+
+  button23 = gtk_button_new ();
+  gtk_widget_set_name (button23, "button23");
+  gtk_widget_show (button23);
+  gtk_box_pack_start (GTK_BOX (hbox6), button23, FALSE, FALSE, 0);
+  GTK_WIDGET_SET_FLAGS (button23, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button23, _("Delete from list"), NULL);
+  gtk_button_set_relief (GTK_BUTTON (button23), GTK_RELIEF_NONE);
+
+  image36 = gtk_image_new_from_stock ("gtk-cancel", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_set_name (image36, "image36");
+  gtk_widget_show (image36);
+  gtk_container_add (GTK_CONTAINER (button23), image36);
+
+  g_signal_connect_swapped ((gpointer) ChannelState, "realize",
+                            G_CALLBACK (on_ChannelState_realize),
+                            GTK_OBJECT (ChannelState));
+  g_signal_connect ((gpointer) button24, "clicked",
+                    G_CALLBACK (on_button24_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button22, "clicked",
+                    G_CALLBACK (on_button22_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button23, "clicked",
+                    G_CALLBACK (on_button23_clicked),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (categories, categories, "categories");
+  GLADE_HOOKUP_OBJECT (categories, hbox6, "hbox6");
+  GLADE_HOOKUP_OBJECT (categories, ChannelState, "ChannelState");
+  GLADE_HOOKUP_OBJECT (categories, button24, "button24");
+  GLADE_HOOKUP_OBJECT (categories, image37, "image37");
+  GLADE_HOOKUP_OBJECT (categories, button22, "button22");
+  GLADE_HOOKUP_OBJECT (categories, image35, "image35");
+  GLADE_HOOKUP_OBJECT (categories, button23, "button23");
+  GLADE_HOOKUP_OBJECT (categories, image36, "image36");
+  GLADE_HOOKUP_OBJECT_NO_REF (categories, tooltips, "tooltips");
+
+  return categories;
 }
 
